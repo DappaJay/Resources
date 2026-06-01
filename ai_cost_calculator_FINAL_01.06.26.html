@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Automation Cost Estimator - Cathy Brown Advisory</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 15px; background: #f2f8fa; color: #1e2d3a; margin: 0; padding: 20px 16px 60px; }
+    .page-header { max-width: 860px; margin: 0 auto 28px; text-align: center; }
+    .page-header .brand { font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: #2a8fa0; margin-bottom: 10px; font-weight: 600; }
+    .page-header h1 { font-size: 26px; font-weight: 700; color: #1a2e44; margin: 0 0 10px; line-height: 1.2; }
+    .page-header p { font-size: 14px; color: #4a6a7a; margin: 0 auto; line-height: 1.6; max-width: 600px; }
+    .calc { max-width: 860px; margin: 0 auto; }
+    .section { background: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 1px solid #d0e4ed; box-shadow: 0 1px 4px rgba(26,46,68,.05); }
+    .section h3 { margin: 0 0 14px; font-size: 11px; letter-spacing: .09em; color: #2a8fa0; text-transform: uppercase; font-weight: 700; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+    @media (max-width: 600px) { .grid2,.grid3,.grid4 { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 400px) { .grid2,.grid3,.grid4 { grid-template-columns: 1fr; } }
+    .field label { display: block; font-size: 12px; color: #4a6a7a; margin-bottom: 4px; font-weight: 500; }
+    .field input, .field select { width: 100%; padding: 7px 10px; border: 1.5px solid #b8d4de; border-radius: 7px; font-size: 14px; background: #f8fcfd; color: #1a2e44; outline: none; transition: border-color .15s; }
+    .field input:focus, .field select:focus { border-color: #2a8fa0; background: #fff; }
+    .field .hint, .hint { font-size: 11px; color: #8aacba; margin-top: 3px; line-height: 1.4; }
+    .ni-note { font-size: 12px; color: #4a6a7a; margin-top: 12px; padding: 8px 12px; background: #eaf4f8; border-radius: 7px; border: 1px solid #c8e0ea; }
+    .toggle-row { display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
+    .toggle-row input[type=checkbox] { width: 17px; height: 17px; cursor: pointer; flex-shrink: 0; accent-color: #2a8fa0; }
+    .toggle-row .tlabel { font-size: 14px; font-weight: 600; color: #1a2e44; }
+    .toggle-row .tsub { font-size: 13px; color: #6b8a99; }
+    .hidden { display: none !important; }
+    .sub-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid #d0e4ed; }
+    .subsection-label { font-size: 10px; color: #8aacba; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+    .maint-total { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 14px; border-top: 1px solid #d0e4ed; font-size: 13px; color: #4a6a7a; font-weight: 500; }
+    .maint-total span { font-size: 16px; font-weight: 700; color: #1a2e44; }
+    .slider-row { display: flex; align-items: center; gap: 14px; }
+    .slider-row label { font-size: 13px; color: #4a6a7a; white-space: nowrap; font-weight: 500; }
+    .slider-row input[type=range] { flex: 1; accent-color: #2a8fa0; }
+    .slider-val { font-size: 16px; font-weight: 700; min-width: 48px; text-align: right; color: #1a2e44; }
+    .emerg-result-box { background: #f4f8fa; border-radius: 8px; border: 1px solid #d0e4ed; padding: 12px; }
+    .emerg-result-box .elabel { font-size: 11px; color: #6b8a99; margin-bottom: 4px; }
+    .emerg-result-box .evalue { font-size: 17px; font-weight: 700; color: #1a2e44; }
+    .callout { border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; font-size: 13px; line-height: 1.6; }
+    .callout.warning { background: #FEF3E2; border: 1px solid #f5a623; color: #7a4a00; }
+    .callout.danger { background: #FDECEC; border: 1px solid #e05c5c; color: #7a1a1a; }
+    .callout .ctitle { font-weight: 700; margin-bottom: 5px; font-size: 14px; }
+    .results { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .result-card { flex: 1; min-width: 130px; background: #ffffff; border-radius: 12px; padding: 16px 12px; text-align: center; border: 1px solid #d0e4ed; box-shadow: 0 1px 4px rgba(26,46,68,.05); }
+    .result-card .rlabel { font-size: 11px; color: #6b8a99; margin-bottom: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; }
+    .result-card .rvalue { font-size: 20px; font-weight: 700; color: #1a2e44; }
+    .result-card .rsub { font-size: 11px; color: #8aacba; margin-top: 4px; }
+    .green { color: #1a7a50; }
+    .red { color: #c0392b; }
+    .breakeven-note { font-size: 13px; color: #4a6a7a; margin-bottom: 8px; min-height: 1.4em; line-height: 1.5; }
+    .footer-note { font-size: 11px; color: #8aacba; line-height: 1.6; margin-top: 8px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; font-size: 12px; color: #4a6a7a; }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-swatch { width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
+    .chart-wrap { position: relative; width: 100%; height: 300px; }
+    .emp-breakdown { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #d0e4ed; }
+    .emp-item { text-align: center; }
+    .emp-item .ei-label { font-size: 11px; color: #6b8a99; margin-bottom: 3px; }
+    .emp-item .ei-value { font-size: 14px; font-weight: 700; color: #1a2e44; }
+    .page-footer { max-width: 860px; margin: 32px auto 0; text-align: center; font-size: 12px; color: #8aacba; border-top: 1px solid #d0e4ed; padding-top: 20px; }
+    .page-footer a { color: #2a8fa0; text-decoration: none; }
+    .page-footer strong { color: #1a2e44; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="brand">Cathy Brown Advisory</div>
+  <h1>AI Automation Cost Estimator</h1>
+  <p style="text-align:left;">Model the full cost picture of replacing a role with AI automation - including build, running costs, support, emergency risk, and the customer churn most vendors never mention.</p>
+</div>
+
+<div class="calc">
+  <div style="background:#eaf4f8;border-radius:8px;padding:12px 14px;font-size:12px;color:#1a2e44;border:1px solid #2a8fa0;margin-bottom:16px;line-height:1.6;">
+    <strong>Why AI costs are different to traditional software costs.</strong> Traditional software is priced by seat or licence - predictable, budgetable, fixed. AI is priced by consumption - every token sent and received costs money, and that cost varies with how the system is built, how it is used, and how much traffic it handles. That is why this tool exists and why comparing scenarios matters more than relying on a single point estimate. The outputs are scenario estimates, not precise forecasts - use them to stress-test decisions before committing.<br><br><strong>All default values are illustrative starting points only.</strong> Replace every field with figures from your own business before drawing any conclusions.
+  </div>
+
+  <div class="section">
+    <h3>Employee</h3>
+    <div class="grid2">
+      <div class="field"><label>Annual salary - gross (£)</label><input type="number" id="salary" value="" step="1000" oninput="calc()"></div>
+      <div class="field"><label>Other on-costs per year (£)</label><input type="number" id="other_costs" value="" step="500" oninput="calc()"><div class="hint">recruitment, training, equipment</div></div>
+      <div class="field"><label>Employer NI rate (%)</label><input type="number" id="ni_rate" value="15" step="0.1" oninput="calc()"><div class="hint">2025/26: 15% - editable for future Budget changes</div></div>
+      <div class="field"><label>Employer pension (%)</label><input type="number" id="pension" value="3" step="0.5" oninput="calc()"><div class="hint">statutory minimum: 3%</div></div>
+    </div>
+    <div class="ni-note" id="ni-calc-note">NI calculated on salary above £5,000/yr (2025/26 secondary threshold)</div>
+    <div class="emp-breakdown">
+      <div class="emp-item"><div class="ei-label">Salary</div><div class="ei-value" id="b-salary"> - </div></div>
+      <div class="emp-item"><div class="ei-label">Employer NI</div><div class="ei-value" id="b-ni"> - </div></div>
+      <div class="emp-item"><div class="ei-label">Pension</div><div class="ei-value" id="b-pension"> - </div></div>
+      <div class="emp-item"><div class="ei-label">Other on-costs</div><div class="ei-value" id="b-other"> - </div></div>
+      <div class="emp-item"><div class="ei-label" style="font-weight:700;color:#1a2e44;">Total employee cost</div><div class="ei-value" style="font-weight:700;color:#1a2e44;" id="b-total"> - </div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>AI Automation - Build Costs</h3>
+    <div class="grid2">
+      <div class="field"><label>Consultancy / audit fee (£)</label><input type="number" id="consultancy" value="" step="250" oninput="calc()"><div class="hint">enter your consultant's quoted fee for discovery and scoping</div></div>
+      <div class="field"><label>Build / development cost (£)</label><input type="number" id="build" value="" step="500" oninput="calc()"><div class="hint">enter your developer's or agency's quoted build cost</div></div>
+    </div>
+    <div class="hint" style="margin-top:10px;">Build costs are expensed in full in year one. Capitalisation under IAS 38 is difficult to justify for most SME AI builds given uncertain useful economic life.</div>
+  </div>
+
+  <div class="section">
+    <h3>AI Automation - Running Costs</h3>
+    <div class="grid2">
+      <div class="field"><label>Platform / subscriptions (£/month)</label><input type="number" id="platform" value="100" step="10" oninput="calc()"><div class="hint">estimate should cover the full platform stack</div></div>
+      <div class="field"><label>Estimated monthly token costs (£)</label><input type="number" id="tokens" value="80" step="10" oninput="calc()"><div class="hint">use the Token Cost Estimator to generate this figure, then apply the build quality adjustment below</div></div>
+      <div class="field" style="grid-column:1/-1"><label>Build quality (multiplies your token estimate)</label>
+        <select id="build_quality" onchange="calc()">
+          <option value="1">Well-architected with caching (1x)</option>
+          <option value="1.5" selected>Well-architected without caching (1.5x)</option>
+          <option value="2">Standard build (2x)</option>
+          <option value="3">Unknown / unaudited (3x)</option>
+          <option value="4">Poor architecture (4x)</option>
+        </select>
+        <div class="hint">If you generated your token figure from the Token Cost Estimator, select Well-architected without caching (1.5x) - that tool already models a well-architected uncached baseline. The multiplier here is an adjustment layer only.<br><br><strong>These multipliers are illustrative estimates.</strong> Real costs will vary depending on your specific build. Poor data quality will push actual costs toward the higher end of the range.</div>
+      </div>
+    </div>
+    <div class="maint-total" style="margin-top:14px;">Total annual running cost (platform + adjusted tokens)<span id="running-total"> - </span></div>
+  </div>
+
+  <div class="section">
+    <h3>Support &amp; Maintenance</h3>
+    <div class="grid3">
+      <div>
+        <p class="subsection-label">In-house</p>
+        <div class="field" style="margin-bottom:10px;"><label>Hours per month</label><input type="number" id="ih_hours" value="0" step="1" oninput="calc()"><div class="hint">0 if no in-house capability</div></div>
+        <div class="field"><label>Internal hourly rate (£)</label><input type="number" id="ih_rate" value="" step="5" oninput="calc()"></div>
+      </div>
+      <div>
+        <p class="subsection-label">External specialist</p>
+        <div class="field" style="margin-bottom:10px;"><label>Specialist day rate (£)</label><input type="number" id="spec_rate" value="" step="50" oninput="calc()"></div>
+        <div class="field"><label>Planned support days/year</label><input type="number" id="planned_days" value="" step="1" oninput="calc()"><div class="hint">quarterly check-ins</div></div>
+      </div>
+      <div>
+        <p class="subsection-label">Reactive &amp; updates</p>
+        <div class="field" style="margin-bottom:10px;"><label>Reactive fix days/year</label><input type="number" id="reactive_days" value="" step="1" oninput="calc()"><div class="hint">bugs, prompt failures</div></div>
+        <div class="field"><label>Update days/year</label><input type="number" id="update_days" value="" step="1" oninput="calc()"><div class="hint">API changes, model version updates</div></div>
+      </div>
+    </div>
+    <div class="maint-total">Total annual support &amp; maintenance<span id="maint-total"> - </span></div>
+    <div class="hint" style="margin-top:8px;">This section does not capture implementation overhead, compliance review, or ongoing prompt testing - factor these in separately for complex builds.</div>
+
+  </div>
+
+  <div class="section">
+    <div class="slider-row">
+      <label>Proportion of role automated:</label>
+      <input type="range" id="automation_pct" min="10" max="100" step="5" value="100" oninput="calc()">
+      <div class="slider-val" id="pct-out">100%</div>
+    </div>
+    <div class="hint" style="margin-top:10px;">This scales the employee cost proportionally. It models the share of this role's cost attributable to the automated task, not a reduced headcount or pay cut.</div>
+  </div>
+
+  <div class="section">
+    <div class="toggle-row">
+      <input type="checkbox" id="critical_toggle" onchange="toggleSec('critical_inputs',this.checked);calc();">
+      <span class="tlabel">Business-critical automation</span>
+      <span class="tsub"> - model emergency risk as a scenario</span>
+    </div>
+    <div id="critical_inputs" class="sub-section hidden">
+      <div class="grid3">
+        <div>
+          <p class="subsection-label">Incident costs</p>
+          <div class="field" style="margin-bottom:10px;"><label>Emergency specialist rate (£/day)</label><input type="number" id="emerg_rate" value="" step="50" oninput="calc()"><div class="hint">typically 1.5x your planned specialist rate</div></div>
+          <div class="field"><label>Days to diagnose and fix</label><input type="number" id="fix_days" value="" min="1" step="1" oninput="calc()"></div>
+        </div>
+        <div>
+          <p class="subsection-label">Business disruption</p>
+          <div class="field" style="margin-bottom:10px;"><label>Disruption cost per day (£)</label><input type="number" id="disruption_day" value="" step="500" oninput="calc()"><div class="hint">lost revenue + manual workaround</div></div>
+          <div class="field"><label>Typical outage duration (days)</label><input type="number" id="outage_days" value="" min="1" step="1" oninput="calc()"></div>
+        </div>
+        <div>
+          <p class="subsection-label">Frequency</p>
+          <div class="field" style="margin-bottom:10px;"><label>Expected once every (years)</label>
+            <select id="return_period" onchange="calc()">
+              <option value="" disabled selected>Select a return period</option>
+              <option value="1">Every year</option>
+              <option value="2">Every 2 years</option>
+              <option value="3">Every 3 years</option>
+              <option value="5">Every 5 years</option>
+              <option value="10">Every 10 years</option>
+            </select>
+            <div class="hint">consider how complex your build is alongside the quality of the architecture - more integrations and steps mean more failure points, as does a poorer quality build</div>
+          </div>
+        </div>
+      </div>
+      <div class="maint-total" style="margin-top:14px;">Expected annual cost<span id="emerg-annual"> - </span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="toggle-row">
+      <input type="checkbox" id="intake_toggle" onchange="toggleSec('intake_inputs',this.checked);calc();">
+      <span class="tlabel">Captures leads / enquiries</span>
+      <span class="tsub"> - model revenue uplift as a scenario</span>
+    </div>
+    <div id="intake_inputs" class="sub-section hidden">
+      <div class="grid4">
+        <div class="field"><label>Missed leads/month</label><input type="number" id="missed_leads" value="" step="5" oninput="calc()"><div class="hint">unanswered calls, after-hours enquiries. This assumes the captured lead would otherwise have been lost entirely and would have converted at the stated rate.</div></div>
+        <div class="field"><label>AI capture rate (%)</label><input type="number" id="capture_rate" value="" step="5" oninput="calc()"></div>
+        <div class="field"><label>Conversion rate (%)</label><input type="number" id="conv_rate" value="" step="5" oninput="calc()"></div>
+        <div class="field"><label>Avg job / order value (£)</label><input type="number" id="job_value" value="" step="50" oninput="calc()"></div>
+      </div>
+      <div class="maint-total">Estimated annual revenue uplift<span id="revenue-uplift-val" class="green"> - </span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="toggle-row">
+      <input type="checkbox" id="cf_toggle" onchange="toggleSec('cf_inputs',this.checked);calc();">
+      <span class="tlabel">Customer-facing automation</span>
+      <span class="tsub"> - model churn risk as a scenario</span>
+    </div>
+    <div id="cf_inputs" class="sub-section hidden">
+      <div class="grid3" style="margin-bottom:14px;">
+        <div class="field"><label>Active customers</label><input type="number" id="customers" value="" step="50" oninput="calc()"></div>
+        <div class="field"><label>Avg annual value per customer (£)</label><input type="number" id="avg_value" value="" step="50" oninput="calc()"></div>
+        <div class="field"><label>New customers acquired per year</label><input type="number" id="new_customers" value="" step="10" oninput="calc()"></div>
+      </div>
+      <p class="subsection-label">AI-driven churn</p>
+      <div class="grid3">
+        <div class="field"><label>Current annual churn (%)</label><input type="number" id="base_churn" value="" step="1" oninput="calc()"></div>
+        <div class="field"><label>Additional annual churn from AI (%)</label><input type="number" id="additional_churn" value="" step="1" oninput="calc()"><div class="hint">above current rate</div></div>
+      </div>
+      <div class="hint" style="margin-top:10px;">These figures model direct revenue loss from customers who leave. They do not capture brand damage - customers who leave due to a poor AI experience may discourage others from engaging. That cost is real but not reliably quantifiable.</div>
+      <div class="hint" style="margin-top:6px;">Base churn is excluded from the net cost position - it exists regardless of whether you deploy AI. It is included in the death spiral warning below, where total customer loss matters regardless of cause.</div>
+      <div class="maint-total" style="margin-top:14px;">Expected annual cost of additional AI-driven churn<span id="churn-annual"> - </span></div>
+    </div>
+  </div>
+
+  <div id="callout-emerg" class="callout warning hidden"><div class="ctitle">⚠ Business disruption risk - scenario analysis</div><div id="callout-emerg-text"></div></div>
+  <div id="callout-spiral" class="callout danger hidden"><div class="ctitle">🔥 Death spiral risk - scenario analysis</div><div id="callout-spiral-text"></div></div>
+
+  <div class="results">
+    <div class="result-card"><div class="rlabel">Employee total cost</div><div class="rvalue" id="r-emp"> - </div><div class="rsub">per year</div></div>
+    <div class="result-card"><div class="rlabel">AI all-in cost</div><div class="rvalue" id="r-ai"> - </div><div class="rsub">per year</div></div>
+    <div class="result-card hidden" id="card-rev"><div class="rlabel">Revenue uplift</div><div class="rvalue green" id="r-rev"> - </div><div class="rsub">per year</div></div>
+    <div class="result-card hidden" id="card-churn"><div class="rlabel">AI-driven churn cost</div><div class="rvalue red" id="r-churn"> - </div><div class="rsub">per year</div></div>
+    <div class="result-card"><div class="rlabel">True net position</div><div class="rvalue" id="r-net"> - </div><div class="rsub">all factors</div></div>
+  </div>
+
+  <div class="section">
+    <h3>Cost breakdown</h3>
+    <div class="legend" id="chart-legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#378ADD"></div>Salary</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#185FA5"></div>Employer NI</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#85B7EB"></div>Pension</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#B5D4F4"></div>Other on-costs</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#085041"></div>Consultancy + build</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#1D9E75"></div>Platform + tokens</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#BA7517"></div>Support &amp; maintenance</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#E24B4A"></div>Emergency risk</div>
+      <div class="legend-item hidden" id="leg-rev" style="display:flex;align-items:center;gap:5px;"><canvas id="legendSwatchRev" width="11" height="11" style="border-radius:2px;flex-shrink:0;"></canvas>Revenue uplift (offsets AI cost)</div>
+      <div class="legend-item hidden" id="leg-churn"><div class="legend-swatch" style="background:#C9A0DC"></div>AI-driven churn</div>
+    </div>
+    <div class="chart-wrap"><canvas id="costChart"></canvas></div>
+    <p style="font-size:11px;color:#8aacba;margin-top:8px;">Revenue uplift shown as a hatched overlay on the AI costs bar - the hatched area represents costs offset by uplift. Churn risk stacked on top of AI costs in lilac - making visible the risk that vendors typically omit.</p>
+    <div id="uplift-overflow-note" class="callout warning hidden" style="margin-top:10px;"><div class="ctitle">Revenue uplift exceeds AI costs</div>Revenue uplift exceeds total AI costs. The chart cannot show the surplus - see the true net position above for the full figure.</div>
+  </div>
+
+  <div class="breakeven-note" id="breakeven-note"></div>
+  <div class="breakeven-note">Payback assumes the projected cost saving or revenue uplift is actually realised. Before committing, be clear on how you will measure whether the automation is delivering the expected outcome.</div>
+  <div class="footer-note">NI secondary threshold fixed at £5,000/yr (2025/26 HMRC rate). NI rate editable for future Budget changes. All figures are pre-tax - corporation tax effects are not modelled.</div>
+</div>
+
+<div class="page-footer">
+  Cathy Brown Advisory &nbsp;·&nbsp; 01.06.26<br>
+  <a href="https://cathybrownadvisory.co.uk">cathybrownadvisory.co.uk</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+var NI_THRESHOLD = 5000;
+var costChart = null;
+
+function gv(id) { var e=document.getElementById(id); return e?(parseFloat(e.value)||0):0; }
+function ck(id) { var e=document.getElementById(id); return e?e.checked:false; }
+function fmt(n) { return '\u00a3'+Math.round(Math.abs(n)).toLocaleString('en-GB'); }
+function setText(id,t) { var e=document.getElementById(id); if(e) e.textContent=t; }
+function setClass(id,c) { var e=document.getElementById(id); if(e) e.className=c; }
+function showEl(id,v) { var e=document.getElementById(id); if(!e) return; if(v) { e.classList.remove('hidden'); e.style.display=''; } else { e.style.display='none'; } }
+function toggleSec(id,on) { var e=document.getElementById(id); if(!e) return; on?e.classList.remove('hidden'):e.classList.add('hidden'); }
+
+function makeHatch(size, color) {
+  var c = document.createElement('canvas');
+  c.width = size; c.height = size;
+  var ctx = c.getContext('2d');
+  ctx.clearRect(0,0,size,size);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(0,size); ctx.lineTo(size,0);
+  ctx.moveTo(-size/2,size/2); ctx.lineTo(size/2,-size/2);
+  ctx.moveTo(size/2,size*1.5); ctx.lineTo(size*1.5,size/2);
+  ctx.stroke();
+  return ctx.createPattern(c, 'repeat');
+}
+
+function drawRevLegendSwatch() {
+  var sw = document.getElementById('legendSwatchRev');
+  if (!sw) return;
+  var ctx = sw.getContext('2d');
+  ctx.clearRect(0,0,11,11);
+  var hatch = makeHatch(10,'rgba(52,160,80,0.9)');
+  ctx.fillStyle = hatch;
+  ctx.fillRect(0,0,11,11);
+  ctx.strokeStyle = 'rgba(52,160,80,0.9)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(0.5,0.5,10,10);
+}
+
+var upliftOverlayPlugin = {
+  id: 'upliftOverlay',
+  afterDatasetsDraw: function(chart) {
+    if (!chart._upliftData) return;
+    var aiTotal = chart._upliftData.aiTotal;
+    var upliftCapped = chart._upliftData.upliftCapped;
+    if (upliftCapped <= 0) return;
+    var meta = chart.getDatasetMeta(4);
+    if (!meta || !meta.data || !meta.data[1]) return;
+    var barEl = meta.data[1];
+    var ctx = chart.ctx;
+    var yScale = chart.scales.y;
+    var x = barEl.x;
+    var w = barEl.width;
+    var yTop    = yScale.getPixelForValue(aiTotal);
+    var yBottom = yScale.getPixelForValue(aiTotal - upliftCapped);
+    var hatch = makeHatch(10,'rgba(52,160,80,0.9)');
+    ctx.save();
+    ctx.fillStyle = hatch;
+    ctx.fillRect(x-w/2, yTop, w, yBottom-yTop);
+    ctx.strokeStyle = 'rgba(52,160,80,0.9)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x-w/2, yTop, w, yBottom-yTop);
+    ctx.restore();
+
+    // label on AI bar if uplift fully covers it
+    if (upliftCapped >= aiTotal) {
+      var yBarTop    = yScale.getPixelForValue(aiTotal);
+      var yBarBottom = yScale.getPixelForValue(0);
+      var midY = (yBarTop + yBarBottom) / 2;
+      ctx.save();
+      var txt = 'Fully offset by uplift';
+      ctx.font = 'bold 11px sans-serif';
+      var tw = ctx.measureText(txt).width;
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.fillRect(x - tw/2 - 6, midY - 9, tw + 12, 18);
+      ctx.fillStyle = '#085041';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(txt, x, midY);
+      ctx.restore();
+    }
+
+    drawRevLegendSwatch();
+  }
+};
+
+function rebuildChart(labels, datasets, upliftData) {
+  if (costChart) { costChart.destroy(); costChart = null; }
+  var ctx = document.getElementById('costChart').getContext('2d');
+  costChart = new Chart(ctx, {
+    type: 'bar',
+    plugins: [upliftOverlayPlugin],
+    data: { labels: labels, datasets: datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: function(c) {
+          return ' ' + c.dataset.label + ': \u00a3' + Math.round(c.raw).toLocaleString('en-GB');
+        }}}
+      },
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 13 } } },
+        y: { stacked: true,
+          ticks: { stepSize: 1000, callback: function(v) { return '\u00a3'+(v>=1000?Math.round(v/1000)+'k':v===0?'0':''); }, font: { size: 11 } },
+          grid: { color: 'rgba(0,0,0,0.06)' }
+        }
+      }
+    }
+  });
+  if (upliftData) costChart._upliftData = upliftData;
+}
+
+function calc() {
+  var salary   = gv('salary');
+  var niRate   = gv('ni_rate') / 100;
+  var penRate  = gv('pension') / 100;
+  var other    = gv('other_costs');
+  var autoPct  = gv('automation_pct') / 100;
+  document.getElementById('pct-out').textContent = Math.round(autoPct*100)+'%';
+
+  var ni      = Math.max(0, (salary - NI_THRESHOLD) * niRate);
+  var pension = salary * penRate;
+  var salaryS = salary  * autoPct;
+  var niS     = ni      * autoPct;
+  var penS    = pension * autoPct;
+  var othS    = other   * autoPct;
+  var totalEmp = salaryS + niS + penS + othS;
+
+  setText('b-salary',  fmt(salaryS));
+  setText('b-ni',      fmt(niS));
+  setText('b-pension', fmt(penS));
+  setText('b-other',   fmt(othS));
+  setText('b-total',   fmt(totalEmp));
+  setText('ni-calc-note',
+    'E\'er NI on salary above \u00a3'+NI_THRESHOLD.toLocaleString('en-GB')+
+    '/yr. At \u00a3'+Math.round(salary).toLocaleString('en-GB')+
+    ' salary: employer NI = '+fmt(ni)+'/yr'+
+    (autoPct<1?' (scaled to '+Math.round(autoPct*100)+'%: '+fmt(niS)+'/yr)':''));
+
+  var consultancy = gv('consultancy');
+  var build       = gv('build');
+  var platform    = gv('platform') * 12;
+  var bqMult      = parseFloat(document.getElementById('build_quality').value) || 1.5;
+  var tokens      = gv('tokens') * 12 * bqMult;
+  var ihCost      = gv('ih_hours') * gv('ih_rate') * 12;
+  var extCost     = (gv('planned_days') + gv('reactive_days') + gv('update_days')) * gv('spec_rate');
+  var totalMaint  = ihCost + extCost;
+  setText('maint-total', fmt(totalMaint)+'/yr');
+  setText('running-total', fmt(platform + tokens)+'/yr');
+
+  var emergAnnual = 0;
+  if (ck('critical_toggle')) {
+    var incident = (gv('emerg_rate') * gv('fix_days')) + (gv('disruption_day') * gv('outage_days'));
+    var rp = parseFloat(document.getElementById('return_period').value) || 3;
+    emergAnnual = incident / rp;
+    setText('emerg-annual', fmt(emergAnnual)+'/yr');
+    setClass('callout-emerg','callout warning');
+    setText('callout-emerg-text',
+      'One incident estimated at '+fmt(incident)+
+      ' (specialist fees: '+fmt(gv('emerg_rate')*gv('fix_days'))+
+      ', disruption: '+fmt(gv('disruption_day')*gv('outage_days'))+
+      '). Probability-weighted annual figure: '+fmt(emergAnnual)+
+      '. Platform outages at Make, Zapier or OpenAI are outside your control.');
+  } else {
+    setClass('callout-emerg','callout warning hidden');
+  }
+
+  var revenueUplift = 0;
+  var showRev = ck('intake_toggle');
+  if (showRev) {
+    revenueUplift = gv('missed_leads')*12*(gv('capture_rate')/100)*(gv('conv_rate')/100)*gv('job_value');
+    setText('revenue-uplift-val', fmt(revenueUplift)+'/yr');
+    showEl('card-rev', true);
+    setText('r-rev', '+'+fmt(revenueUplift));
+    showEl('leg-rev', true);
+  } else {
+    showEl('card-rev', false);
+    showEl('leg-rev', false);
+  }
+
+  var directChurn = 0;
+  var showChurn = ck('cf_toggle');
+  if (showChurn) {
+    var cust      = gv('customers');
+    var avgVal    = gv('avg_value');
+    var aiCh      = gv('additional_churn') / 100;
+    var baseCh    = gv('base_churn') / 100;
+    var newCust   = gv('new_customers');
+    var aiChurned = cust * aiCh;
+    directChurn   = aiChurned * avgVal;
+    showEl('card-churn', true);
+    setText('r-churn', fmt(directChurn));
+    setText('churn-annual', fmt(directChurn)+'/yr');
+    showEl('leg-churn', true);
+    var netFlow = newCust - (cust*baseCh) - aiChurned;
+    if (netFlow < 0) {
+      var nfp = netFlow / cust;
+      var nfpCheck = 1 + nfp;
+      var yth = nfpCheck <= 0 ? 'less than 1' : Math.round(Math.log(0.5)/Math.log(nfpCheck));
+      setClass('callout-spiral','callout danger');
+      setText('callout-spiral-text',
+        'Customer base projected to shrink by '+Math.abs(Math.round(netFlow))+' customers/year. '+
+        'AI-driven churn of '+Math.round(aiCh*100)+'% adds '+Math.round(aiChurned)+' lost customers on top of natural churn. '+
+        'Revenue halves in approximately '+yth+' year'+(yth===1?'':'s')+'. This compounds. Brand damage from poor AI experiences may accelerate this further.');
+    } else {
+      setClass('callout-spiral','callout danger hidden');
+    }
+  } else {
+    showEl('card-churn', false);
+    showEl('leg-churn', false);
+    setClass('callout-spiral','callout danger hidden');
+  }
+
+  var running   = platform + tokens;
+  var totalAI   = (consultancy + build) + running + totalMaint + emergAnnual;
+  var totalChurn = directChurn;
+  var trueNet   = totalEmp - totalAI + revenueUplift - totalChurn;
+
+  setText('r-emp', fmt(totalEmp));
+  setText('r-ai',  fmt(totalAI));
+  var ne = document.getElementById('r-net');
+  if (ne) {
+    ne.textContent = (trueNet>=0?'+':'-')+fmt(trueNet);
+    ne.style.color = trueNet>=0 ? '#1a7a50' : '#c0392b';
+  }
+
+  var runningNet = totalEmp - running - totalMaint - emergAnnual + revenueUplift - totalChurn;
+  var note = '';
+  if (trueNet < 0) {
+    var components = [
+      {label:'consultancy and build', value: consultancy+build},
+      {label:'platform and token costs', value: running},
+      {label:'support and maintenance', value: totalMaint},
+      {label:'emergency risk', value: emergAnnual},
+      {label:'AI-driven churn', value: totalChurn}
+    ];
+    var biggest = components.reduce(function(a,b){ return b.value > a.value ? b : a; });
+    note = 'All-in position is negative at these inputs. The largest cost driver is ' + biggest.label + ' at ' + fmt(biggest.value) + '/yr.';
+  } else if ((consultancy+build)>0 && runningNet>0) {
+    var m = (consultancy+build)/(runningNet/12);
+    var upliftNote = revenueUplift > 0 ? ' (including revenue uplift)' : '';
+    note = 'Year one build costs of '+fmt(consultancy+build)+' recover in approximately '+(m<1?'under 1 month':Math.round(m)+' month'+(Math.round(m)===1?'':'s'))+upliftNote+'.';
+  }
+  setText('breakeven-note', note);
+
+  // --- BUILD CHART ---
+  // Always two columns: Employee | AI Costs
+  // Revenue uplift drawn as hatched overlay on AI costs bar via plugin
+  var labels = ['Employee', 'AI Costs'];
+  var nBars = 2;
+
+  function bar(idx, v) {
+    var d = [];
+    for (var i=0; i<nBars; i++) d.push(i===idx?v:0);
+    return d;
+  }
+
+  var empIdx = 0;
+  var aiIdx  = 1;
+
+  var datasets = [
+    {label:'Salary',             data:bar(empIdx,  salaryS),          backgroundColor:'#378ADD', stack:'c'},
+    {label:'Employer NI',        data:bar(empIdx,  niS),              backgroundColor:'#185FA5', stack:'c'},
+    {label:'Pension',            data:bar(empIdx,  penS),             backgroundColor:'#85B7EB', stack:'c'},
+    {label:'Other on-costs',     data:bar(empIdx,  othS),             backgroundColor:'#B5D4F4', stack:'c'},
+    {label:'Consultancy + build',data:bar(aiIdx,   consultancy+build),backgroundColor:'#085041', stack:'c'},
+    {label:'Platform + tokens',  data:bar(aiIdx,   running),          backgroundColor:'#1D9E75', stack:'c'},
+    {label:'Support & maint.',   data:bar(aiIdx,   totalMaint),       backgroundColor:'#BA7517', stack:'c'},
+    {label:'Emergency risk',     data:bar(aiIdx,   emergAnnual),      backgroundColor:'#E24B4A', stack:'c'}
+  ];
+
+  if (showChurn) {
+    datasets.push({label:'AI-driven churn', data:bar(aiIdx, directChurn), backgroundColor:'#C9A0DC', stack:'c'});
+  }
+
+  var aiBarTotal = (consultancy+build) + running + totalMaint + emergAnnual + (showChurn ? directChurn : 0);
+  var upliftCapped = showRev ? Math.min(revenueUplift, aiBarTotal) : 0;
+  var upliftData = showRev ? {aiTotal: aiBarTotal, upliftCapped: upliftCapped} : null;
+
+  rebuildChart(labels, datasets, upliftData);
+
+  if (showRev && revenueUplift > aiBarTotal) {
+    setClass('uplift-overflow-note', 'callout warning');
+  } else {
+    setClass('uplift-overflow-note', 'callout warning hidden');
+  }
+}
+
+calc();
+</script>
+</body>
+</html>

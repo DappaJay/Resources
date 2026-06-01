@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Token Estimator - Cathy Brown Advisory</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; background: #f2f8fa; color: #1e2d3a; margin: 0; padding: 20px 16px 60px; }
+    .page-header { max-width: 900px; margin: 0 auto 24px; text-align: center; }
+    .brand { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #2a8fa0; margin-bottom: 8px; font-weight: 700; }
+    .page-header h1 { font-size: 24px; font-weight: 700; color: #1a2e44; margin: 0 0 8px; }
+    .page-header p { font-size: 13px; color: #4a6a7a; margin: 0 auto; line-height: 1.6; max-width: 660px; }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    .intro { background: #fff; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; border: 1px solid #d0e4ed; font-size: 13px; color: #4a6a7a; line-height: 1.7; }
+    .intro strong { color: #1a2e44; }
+    .intro ul { margin: 10px 0 0 0; padding-left: 18px; }
+    .intro ul li { margin-bottom: 5px; }
+    .explainer { background: #eaf4f8; border-radius: 8px; padding: 12px 14px; font-size: 12px; color: #4a6a7a; line-height: 1.6; margin-bottom: 14px; border: 1px solid #c8e0ea; }
+    .explainer strong { color: #1a2e44; }
+    .card { background: #fff; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; border: 1px solid #d0e4ed; box-shadow: 0 1px 4px rgba(26,46,68,.05); }
+    .card h3 { margin: 0 0 12px; font-size: 11px; letter-spacing: .09em; color: #2a8fa0; text-transform: uppercase; font-weight: 700; }
+    .settings-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+    .settings-row .field { flex: 1; min-width: 160px; }
+    .field label { display: block; font-size: 12px; color: #4a6a7a; margin-bottom: 4px; font-weight: 500; }
+    .field input, .field select { width: 100%; padding: 7px 10px; border: 1.5px solid #b8d4de; border-radius: 7px; font-size: 13px; background: #f8fcfd; color: #1a2e44; outline: none; }
+    .field input:focus, .field select:focus { border-color: #2a8fa0; background: #fff; }
+    .field .hint { font-size: 11px; color: #8aacba; margin-top: 3px; line-height: 1.5; }
+    .field .hint.warn { color: #BA7517; }
+    .field .hint.assume { color: #4a7a5a; font-style: italic; }
+    .step-card { background: #fff; border-radius: 12px; border: 1px solid #d0e4ed; margin-bottom: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(26,46,68,.05); }
+    .step-header { background: #1a2e44; color: #fff; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .step-num { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+    .step-body { padding: 16px 20px; }
+    .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .g4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    @media (max-width: 640px) { .g2,.g3,.g4 { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 400px) { .g2,.g3,.g4 { grid-template-columns: 1fr; } }
+    .divider { border: none; border-top: 1px solid #e8f0f4; margin: 14px 0; }
+    .providers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 580px) { .providers-grid { grid-template-columns: 1fr; } }
+    .pbox { background: #f8fcfd; border-radius: 8px; border: 1px solid #d0e4ed; padding: 14px; }
+    .pbox.anth { border-top: 3px solid #2a8fa0; }
+    .pbox.openai { border-top: 3px solid #10a37f; }
+    .pname { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 4px; }
+    .pname.anth { color: #2a8fa0; }
+    .pname.openai { color: #10a37f; }
+    .pverified { font-size: 10px; color: #8aacba; margin-bottom: 10px; }
+    .price-disp { font-size: 11px; color: #6b8a99; margin-top: 6px; padding: 5px 8px; background: #fff; border-radius: 5px; border: 1px solid #d0e4ed; line-height: 1.5; }
+    .price-disp b { color: #1a2e44; }
+    .custom-grid { display: none; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .tok-line { font-size: 11px; color: #8aacba; margin-top: 4px; text-align: right; line-height: 1.5; }
+    .warn-ok { display: none; }
+    .warn-overkill { margin-top: 8px; padding: 7px 10px; background: #FEF3E2; border: 1px solid #f5a623; border-radius: 6px; font-size: 11px; color: #7a4a00; line-height: 1.5; }
+    .warn-weak { margin-top: 8px; padding: 7px 10px; background: #FDECEC; border: 1px solid #e05c5c; border-radius: 6px; font-size: 11px; color: #7a1a1a; line-height: 1.5; }
+    .autofill-box { background: #eaf4f8; border: 1px solid #b8d4de; border-radius: 7px; padding: 8px 10px; font-size: 13px; color: #1a2e44; }
+    .af-label { font-size: 11px; color: #4a6a7a; margin-bottom: 4px; font-weight: 400; }
+    .af-breakdown { font-size: 11px; color: #6b8a99; margin-top: 4px; line-height: 1.7; }
+    .results-dark { background: #1a2e44; color: #fff; border-radius: 12px; padding: 20px; margin-bottom: 14px; }
+    .results-dark h3 { color: #b8d4de; font-size: 11px; text-transform: uppercase; letter-spacing: .09em; margin: 0 0 14px; }
+    .rg2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    @media (max-width: 500px) { .rg2 { grid-template-columns: 1fr; } }
+    .rprov { background: rgba(255,255,255,.07); border-radius: 10px; padding: 14px; }
+    .rprov-name { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; color: #b8d4de; }
+    .rrow { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .rrow:last-child { border-bottom: none; }
+    .rrow .rl { font-size: 12px; color: #8aacba; }
+    .rrow .rv { font-size: 15px; font-weight: 700; }
+    .rrow .rv.big { font-size: 20px; }
+    .insight { background: rgba(42,143,160,.18); border: 1px solid rgba(42,143,160,.35); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #b8d4de; line-height: 1.6; margin-bottom: 10px; }
+    .insight b { color: #fff; }
+    .insight.green { background: rgba(82,196,122,.12); border-color: rgba(82,196,122,.3); }
+    .insight.amber { background: rgba(245,166,35,.1); border-color: rgba(245,166,35,.35); }
+    .accuracy-box { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: 12px 14px; font-size: 12px; color: #8aacba; line-height: 1.6; margin-bottom: 14px; }
+    .accuracy-box b { color: #fff; }
+    .breakdown-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 4px; }
+    .breakdown-table th { color: #8aacba; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; padding: 6px 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,.1); }
+    .breakdown-table td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,.06); vertical-align: middle; }
+    .breakdown-table tr:last-child td { border-bottom: none; }
+    .tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+    .tag.ok { background: rgba(82,196,122,.2); color: #52C47A; }
+    .tag.overkill { background: rgba(245,166,35,.25); color: #f5a623; }
+    .tag.weak { background: rgba(224,75,74,.25); color: #E24B4A; }
+    .feed-in { background: #fff; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; border: 2px solid #2a8fa0; }
+    .feed-in h3 { font-size: 11px; letter-spacing: .09em; color: #2a8fa0; text-transform: uppercase; font-weight: 700; margin: 0 0 10px; }
+    .feed-in p { font-size: 13px; color: #1a2e44; line-height: 1.7; margin: 0 0 8px; }
+    .feed-in p:last-child { margin-bottom: 0; }
+    .feed-in .tier-list { margin: 8px 0 0 0; padding-left: 18px; font-size: 12px; color: #4a6a7a; line-height: 1.8; }
+    .limitations { background: #fff; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; border: 1px solid #d0e4ed; }
+    .limitations h3 { font-size: 11px; letter-spacing: .09em; color: #4a6a7a; text-transform: uppercase; font-weight: 700; margin: 0 0 12px; }
+    .limitations ul { margin: 0; padding-left: 18px; font-size: 12px; color: #6b8a99; line-height: 1.9; }
+    .limitations ul li { margin-bottom: 2px; }
+    .limitations .ast { font-weight: 700; color: #2a8fa0; }
+    .footer-note { font-size: 11px; color: #8aacba; line-height: 1.6; margin-bottom: 14px; }
+    .footer-note a { color: #2a8fa0; }
+    .page-footer { max-width: 900px; margin: 32px auto 0; text-align: center; font-size: 12px; color: #8aacba; border-top: 1px solid #d0e4ed; padding-top: 20px; }
+    .page-footer a { color: #2a8fa0; text-decoration: none; }
+    .page-footer b { color: #1a2e44; }
+    .ref { font-size: 10px; color: #4a7a5a; vertical-align: super; margin-left: 1px; font-weight: 700; }
+    .ref-note { margin-bottom: 6px; color: #4a7a5a; font-size: 12px; line-height: 1.6; }
+    .ref-num { color: #4a7a5a; font-weight: 700; margin-right: 6px; font-size: 10px; vertical-align: super; }
+    .within-tier-note { margin-top: 6px; padding: 5px 8px; background: #FEF3E2; border: 1px solid #f5a623; border-radius: 5px; font-size: 11px; color: #7a4a00; line-height: 1.5; display: none; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="brand">Cathy Brown Advisory</div>
+  <h1>AI Token Estimator</h1>
+  <p>Built for: <strong>Customer Enquiry Handler</strong></p>
+</div>
+
+<div class="wrap">
+
+  <div class="intro">
+    <strong>How this tool works</strong>
+    <p style="margin:8px 0 0;">A customer enquiry handler typically contains two separate AI steps - each with its own cost:</p>
+    <ul>
+      <li><strong>Step 1 - Classify:</strong> the AI reads the incoming message and decides what type of enquiry it is. This step is quick, cheap, and produces a short output.</li>
+      <li><strong>Step 2 - Respond:</strong> the AI uses the classification result and the original message to draft a reply. This step does the heavy lifting and costs more.</li>
+    </ul>
+    <p style="margin:8px 0 0;">The total cost per enquiry is the sum of both steps. Configure each step below using what you know about your automation, then read the results at the bottom.</p>
+  </div>
+
+  <div class="explainer" style="background:#fff;border:1px solid #2a8fa0;font-size:12px;color:#1a2e44;">
+    <strong>Why AI costs are different to traditional software costs.</strong> Traditional software is priced by seat or licence - predictable, budgetable, fixed. AI is priced by consumption - every token sent and received costs money, and that cost varies with how the system is built, how it is used, and how much traffic it handles. That is why this tool exists and why comparing scenarios matters more than relying on a single point estimate. Use the outputs to stress-test decisions - not as a precise cost forecast.
+  </div>
+
+  <div class="explainer">
+    <strong>What is a token?</strong> AI models charge by the token - roughly one token per word in plain English. Every token sent in and every token written back costs a tiny amount. These amounts add up fast at volume. This tool calculates what you will pay based on how your automation is designed, which model you use, and how often it runs.
+  </div>
+
+  <div class="explainer" style="background:#fff;border:1px solid #4a7a5a;font-size:12px;color:#1a2e44;">
+    <strong>This tool models a non-agentic automation.</strong> A two-step classify-and-respond pipeline is a fixed linear workflow - one API call to classify, one to reply, predictable token costs every time. This is different from agentic AI, where a model takes autonomous multi-step actions, calls tools, and loops back on itself. Agentic workflows can use 10 to 1,000 times more tokens per task and are a significant contributing factor in the AI budget overruns making headlines in 2026. If you are evaluating an agentic build, the cost model is significantly different and not covered by this tool.
+  </div>
+
+  <div class="card">
+    <h3>Automation settings</h3>
+    <div class="settings-row">
+      <div class="field">
+        <label>How many enquiries do you receive per month?</label>
+        <input type="number" id="runs" value="500" step="50" oninput="renderResults()">
+        <div class="hint">The automation fires instantly each time an enquiry arrives - not on a schedule. 500 here means 500 enquiries received that month, at any hour of any day.</div>
+        <div class="hint" style="margin-top:4px;">Each enquiry triggers both steps. So 500 enquiries = 1,000 individual AI calls. The cost calculation accounts for this automatically.</div>
+        <div class="hint assume" style="margin-top:4px;"><span class="ref">1</span> This figure is assumed flat across all 12 months.</div>
+      </div>
+      <div class="field">
+        <label>USD to GBP exchange rate</label>
+        <input type="number" id="fx" value="0.79" step="0.01" oninput="renderResults()">
+        <div class="hint">AI models are priced in USD. Default set May 2026 - check current rate at xe.com before use.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="steps-wrap"></div>
+
+  <div id="results-wrap"></div>
+
+  <div class="feed-in">
+    <h3>Feeding this into the AI Automation Cost Estimator</h3>
+    <p style="font-size:12px;color:#6b8a99;font-style:italic;margin-bottom:10px;">This tool is most useful for comparing scenarios - for example, what happens if volume doubles, or if you switch model - rather than predicting an exact monthly bill.</p>
+    <p>Take the <strong>monthly token cost figure</strong> from the results above and enter it directly into the "Estimated token costs per month" field in the AI Automation Cost Estimator. No further calculation is needed - the monthly figure is already shown.</p>
+    <p>Then set the build quality dropdown in that tool as follows:</p>
+    <ul class="tier-list">
+      <li><strong>Well-architected without caching (1.5x)</strong> - if your build uses RAG and efficient routing but no prompt caching. This is what this tool models.</li>
+      <li><strong>Well-architected with caching (1x)</strong> - if your build also implements prompt caching. Your actual costs will be approximately 30 to 50% lower than shown here.</li>
+      <li><strong>Unknown/unaudited (3x)</strong> - if you are unsure how your automation is built. Use this as a conservative estimate.</li>
+    </ul>
+  </div>
+
+  <div class="limitations">
+    <h3>Notes and assumptions</h3>
+    <div class="ref-note"><span class="ref-num">1</span> Monthly volume is assumed flat across all 12 months with no seasonality, growth or downtime. Seasonal businesses should use their true average monthly figure.</div>
+    <div class="ref-note"><span class="ref-num">2</span> The original message length selection in Step 1 feeds directly into Step 2 input token count. Selecting the wrong band has an outsized effect on total cost accuracy across both steps.</div>
+    <div class="ref-note"><span class="ref-num">3</span> This tool models full knowledge base injection on every call. A well-architected build using RAG retrieves only the relevant section, which can reduce knowledge base token costs by 80 to 90%.</div>
+    <div class="ref-note"><span class="ref-num">4</span> System prompt tokens are sent to the AI on every single call. A longer system prompt adds cost on every enquiry.</div>
+    <div class="ref-note"><span class="ref-num">5</span> Output tokens cost significantly more per token than input tokens at every provider - up to 5x more depending on the model. Response length has a disproportionate effect on total cost compared to an equivalent increase in input length.</div>
+    <div class="ref-note"><span class="ref-num">6</span> Model tier recommendations are a judgement-based starting point and not a universal standard. The right model depends on your specific use case and the quality of output required.</div>
+    <div class="ref-note"><span class="ref-num">7</span> Token counts shown are estimates based on your selections. Actual counts vary by content type - technical content, numbers, punctuation and non-English text tokenise differently to plain English prose. Non-English languages can use 2 to 3 times as many tokens per word as English, which would significantly increase costs beyond what this tool shows.</div>
+    <div class="ref-note"><span class="ref-num">8</span> This tool models a single enquiry processed once from start to finish. Automations handling ongoing conversation threads accumulate context across exchanges and will incur higher costs than shown.</div>
+    <div class="ref-note"><span class="ref-num">9</span> The total cost assumes every enquiry completes both steps. If your automation routes some enquiries to a human after Step 1, actual Step 2 costs will be proportionally lower.</div>
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid #d0e4ed;">
+      <div style="font-size:11px;font-weight:700;color:#4a6a7a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">What this tool does not include</div>
+      <div style="font-size:12px;color:#6b8a99;line-height:1.8;">API retry costs (failed calls that re-run) - Moderation or safety filter calls - Tool use or function calling overhead - Vendor platform fees (Make.com, Zapier subscriptions) - Prompt truncation costs - Human review time - Token counts for non-English, technical, or heavily punctuated text may be higher than shown (non-English text and numbers tokenise less efficiently than plain English prose)</div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Prices verified May 2026 from official Anthropic and OpenAI documentation. All prices in USD converted at stated rate.
+    Verify current pricing:
+    <a href="https://platform.claude.com/docs/en/about-claude/pricing" target="_blank">Anthropic</a> &nbsp;·&nbsp;
+    <a href="https://platform.openai.com/docs/pricing" target="_blank">OpenAI</a>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  Cathy Brown Advisory &nbsp;·&nbsp; 01.06.26<br>
+  <a href="https://cathybrownadvisory.co.uk">cathybrownadvisory.co.uk</a>
+</div>
+
+<script>
+// ── CONSTANTS ────────────────────────────────────────────────────────────────
+
+var SYS_OPTIONS = [
+  { id:'minimal',  label:'Minimal (20 tokens) - one or two line instruction, no persona or rules', tokens:20 },
+  { id:'simple',   label:'Simple (100 tokens) - basic persona and a few rules', tokens:100 },
+  { id:'standard', label:'Standard (300 tokens) - defined persona, tone guidance, scope and escalation rules', tokens:300 },
+  { id:'detailed', label:'Detailed (600 tokens) - full persona, extensive rules, examples included', tokens:600 },
+  { id:'complex',  label:'Complex (1,200 tokens) - detailed rules, multiple examples, dynamic content injection', tokens:1200 }
+];
+
+var IN_TOK  = { short:75, medium:267, long:360, very_long:1670 };
+var OUT_TOK = { few_words:6, sentence:40, paragraph:150, full_reply:275 };
+var KB_TOK  = { none:0, small_faq:500, policy_doc:2500, large_kb:8000 };
+
+var CPX_LABEL = {
+  1: 'Low - one clear right answer, no judgement needed (e.g. spot a keyword, pick a category)',
+  2: 'Medium - some judgement required (e.g. weigh a few factors, extract and structure data)',
+  3: 'High - significant reasoning or writing quality needed (e.g. compose, evaluate, persuade)',
+  4: 'Very high - nuanced, sensitive or multi-step reasoning (e.g. handle complaints, legal tone)'
+};
+
+var OUT_OPTIONS_BY_CPX = {
+  1: ['few_words','sentence'],
+  2: ['few_words','sentence','paragraph'],
+  3: ['few_words','sentence','paragraph','full_reply'],
+  4: ['few_words','sentence','paragraph','full_reply']
+};
+
+var OUT_LABEL = {
+  few_words:          'Very short - a word, label, number or yes/no',
+  sentence:           'Short - one or two sentences',
+  paragraph:          'Medium - a short paragraph',
+  full_reply: 'Full reply - 2 to 3 paragraphs'
+};
+
+var IN_LABEL = {
+  short:     'Short (~50 words) e.g. a text message or form field',
+  medium:    'Medium (~200 words) e.g. a short email',
+  long:      'Long (~500 words) e.g. a detailed complaint email',
+  very_long: 'Very long (~1,500 words) e.g. an email chain or document'
+};
+
+var KB_LABEL = {
+  none:       'None - no reference document injected',
+  small_faq:  'Small FAQ (~10 Q&As) - injected every call',
+  policy_doc: 'Policy document (~5 pages) - injected every call',
+  large_kb:   'Large knowledge base (20+ pages) - injected every call'
+};
+
+var REC_TIER = { 1:1, 2:1, 3:2, 4:3 };
+
+var ANTH = [
+  { id:'haiku45',  name:'Claude Haiku 4.5',  inM:1.00,  outM:5.00,  tier:1 },
+  { id:'sonnet46', name:'Claude Sonnet 4.6', inM:3.00,  outM:15.00, tier:2 },
+  { id:'opus47',   name:'Claude Opus 4.7',   inM:5.00,  outM:25.00, tier:3 },
+  { id:'custom_a', name:'Custom - enter my own', inM:null, outM:null, tier:null }
+];
+var OAI = [
+  { id:'mini',     name:'GPT-4o mini', inM:0.15, outM:0.60,  tier:1 },
+  { id:'gpt41',    name:'GPT-4.1',     inM:2.00, outM:8.00,  tier:2 },
+  { id:'gpt4o',    name:'GPT-4o',      inM:2.50, outM:10.00, tier:3 },
+  { id:'custom_o', name:'Custom - enter my own', inM:null, outM:null, tier:null }
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+
+var steps = [
+  { id:1, desc:'Classify the incoming enquiry', cpx:1, inSz:'medium', kb:'none', outSz:'few_words', sys:'simple',
+    aModel:'haiku45',  aIn:1.00, aOut:5.00,  oModel:'mini',  oIn:0.15, oOut:0.60 },
+  { id:2, desc:'Draft a personalised reply',   cpx:3, inSz:'medium', kb:'small_faq', outSz:'full_reply', sys:'standard',
+    aModel:'sonnet46', aIn:3.00, aOut:15.00, oModel:'gpt41', oIn:2.00, oOut:8.00 }
+];
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+
+function gv(id) { var e=document.getElementById(id); return e?(parseFloat(e.value)||0):0; }
+function fStep(id) { for(var i=0;i<steps.length;i++) if(steps[i].id===id) return steps[i]; return null; }
+function fStepIdx(id) { for(var i=0;i<steps.length;i++) if(steps[i].id===id) return i; return 0; }
+function fModel(list,id) { for(var i=0;i<list.length;i++) if(list[i].id===id) return list[i]; return null; }
+function getSysTok(sysId) { for(var i=0;i<SYS_OPTIONS.length;i++) if(SYS_OPTIONS[i].id===sysId) return SYS_OPTIONS[i].tokens; return 200; }
+
+function clampOutSz(outSz, cpx) {
+  var allowed=OUT_OPTIONS_BY_CPX[cpx]||OUT_OPTIONS_BY_CPX[1];
+  for(var i=0;i<allowed.length;i++) if(allowed[i]===outSz) return outSz;
+  return allowed[allowed.length-1];
+}
+
+function getContextTokens(stepIdx) {
+  var ctx = IN_TOK[steps[0].inSz]||267;
+  for(var i=0;i<stepIdx;i++) ctx += OUT_TOK[steps[i].outSz]||15;
+  return ctx;
+}
+
+function tokens(stepIdx) {
+  var s=steps[stepIdx];
+  var sysTok=getSysTok(s.sys);
+  var ctx=getContextTokens(stepIdx);
+  return { sys:sysTok, ctx:ctx, kb:KB_TOK[s.kb]||0, inp:sysTok+ctx+(KB_TOK[s.kb]||0), out:OUT_TOK[s.outSz]||15 };
+}
+
+function prices(s, prov) {
+  if(prov==='a'){
+    if(s.aModel==='custom_a') return {inM:s.aIn,outM:s.aOut,tier:null};
+    return fModel(ANTH,s.aModel)||{inM:1,outM:5,tier:1};
+  } else {
+    if(s.oModel==='custom_o') return {inM:s.oIn,outM:s.oOut,tier:null};
+    return fModel(OAI,s.oModel)||{inM:0.15,outM:0.60,tier:1};
+  }
+}
+
+function costUSD(stepIdx, prov) {
+  var t=tokens(stepIdx), p=prices(steps[stepIdx],prov);
+  return (t.inp/1e6)*p.inM+(t.out/1e6)*p.outM;
+}
+
+function fmtP(n)  { return '\u00a3'+n.toFixed(4); }
+function fmtM(n)  { return '\u00a3'+(n<10?n.toFixed(2):Math.round(n).toLocaleString('en-GB')); }
+function fmtK(n)  { return Math.round(n) < 1 ? 'under \u00a31' : '\u00a3'+Math.round(n).toLocaleString('en-GB'); }
+function gbp(usd) { return usd*(gv('fx')||0.79); }
+
+function mismatch(s, prov) {
+  var p=prices(s,prov); if(p.tier===null) return null;
+  var rec=REC_TIER[s.cpx]||1, list=prov==='a'?ANTH:OAI;
+  if(p.tier>rec){
+    var rm=null; for(var i=0;i<list.length;i++) if(list[i].tier===rec){rm=list[i];break;}
+    if(rm){
+      var sidx=fStepIdx(s.id), t=tokens(sidx);
+      var cur=(t.inp/1e6)*p.inM+(t.out/1e6)*p.outM;
+      var r=(t.inp/1e6)*rm.inM+(t.out/1e6)*rm.outM;
+      return {type:'overkill',save:Math.round((1-r/cur)*100),recName:rm.name};
+    }
+  }
+  if(p.tier<rec) return {type:'weak'};
+  return null;
+}
+
+function withinTierNote(s, prov) {
+  var list=prov==='a'?ANTH:OAI;
+  var selM=prov==='a'?s.aModel:s.oModel;
+  var sel=fModel(list,selM); if(!sel||sel.tier===null) return null;
+  var sametier=[];
+  for(var i=0;i<list.length;i++) if(list[i].tier===sel.tier&&list[i].id!==selM&&list[i].inM!==null) sametier.push(list[i]);
+  for(var i=0;i<sametier.length;i++){
+    if(sametier[i].inM<sel.inM){
+      var saving=Math.round((1-sametier[i].inM/sel.inM)*100);
+      return sametier[i].name+' is in the same capability tier but costs approximately '+saving+'% less on input tokens.';
+    }
+  }
+  return null;
+}
+
+// ── DOM HELPERS ──────────────────────────────────────────────────────────────
+
+function setText(id,t) { var e=document.getElementById(id); if(e) e.textContent=t; }
+function setHTML(id,h) { var e=document.getElementById(id); if(e) e.innerHTML=h; }
+
+function buildOutOpts(cpx, selectedOutSz) {
+  var allowed=OUT_OPTIONS_BY_CPX[cpx]||OUT_OPTIONS_BY_CPX[1];
+  var clamped=clampOutSz(selectedOutSz,cpx);
+  var html='';
+  for(var i=0;i<allowed.length;i++){
+    var k=allowed[i];
+    html+='<option value="'+k+'"'+(k===clamped?' selected':'')+'>'+OUT_LABEL[k]+'</option>';
+  }
+  return html;
+}
+
+function buildSysOpts(selectedSys) {
+  var html='';
+  for(var i=0;i<SYS_OPTIONS.length;i++){
+    var o=SYS_OPTIONS[i];
+    html+='<option value="'+o.id+'"'+(o.id===selectedSys?' selected':'')+'>'+o.label+'</option>';
+  }
+  return html;
+}
+
+function buildAutoInput(stepIdx) {
+  var t=tokens(stepIdx);
+  var s=steps[stepIdx];
+  var html='<div class="af-label">Input tokens - auto-calculated from previous steps</div>';
+  html+='<div class="af-breakdown">';
+  html+='System instructions: '+t.sys+' tokens<br>';
+  html+='Original customer message: '+(IN_TOK[steps[0].inSz]||267)+' tokens<br>';
+  html+='Step 1 response passed forward: '+(OUT_TOK[steps[0].outSz]||15)+' tokens<br>';
+  if(t.kb>0) html+='Knowledge base (this step): '+t.kb+' tokens<br>';
+  html+='<strong>Total input: '+t.inp.toLocaleString('en-GB')+' tokens</strong>';
+  html+='</div>';
+  return html;
+}
+
+function refreshPriceDisplay(sid, prov) {
+  var s=fStep(sid); if(!s) return;
+  var p=prices(s,prov);
+  var el=document.getElementById(prov+'-pd-'+sid); if(!el) return;
+  el.innerHTML=p.inM!==null
+    ?'Input: <b>$'+p.inM.toFixed(2)+'</b> &nbsp; Output: <b>$'+p.outM.toFixed(2)+'</b> per million tokens'
+    :'Enter your prices above';
+}
+
+function refreshMismatch(sid, prov) {
+  var s=fStep(sid); if(!s) return;
+  var m=mismatch(s,prov);
+  var el=document.getElementById(prov+'-warn-'+sid); if(!el) return;
+  if(m&&m.type==='overkill'){
+    el.className='warn-overkill';
+    el.innerHTML='<b>Likely overkill for this task.</b> '+m.recName+' would handle this and costs approximately '+m.save+'% less per call. Note: this assumes the cheaper model produces acceptable quality output - reliable for classification, less certain for complex drafting.';
+  } else if(m&&m.type==='weak'){
+    el.className='warn-weak';
+    el.innerHTML='<b>May underperform on this task.</b> Consider a more capable model for better quality output.';
+  } else { el.className='warn-ok'; el.innerHTML=''; }
+}
+
+function refreshWithinTier(sid, prov) {
+  var s=fStep(sid); if(!s) return;
+  var note=withinTierNote(s,prov);
+  var el=document.getElementById(prov+'-tier-'+sid); if(!el) return;
+  if(note){ el.style.display='block'; el.textContent=note; }
+  else { el.style.display='none'; el.textContent=''; }
+}
+
+function refreshStepCost(sid) {
+  var sidx=fStepIdx(sid); var s=steps[sidx]; if(!s) return;
+  var aC=gbp(costUSD(sidx,'a')), oC=gbp(costUSD(sidx,'o'));
+  
+  var t=tokens(sidx);
+  var el=document.getElementById('tok-'+sid);
+  if(el) el.innerHTML=t.inp.toLocaleString('en-GB')+' input + '+t.out+' output = '+(t.inp+t.out).toLocaleString('en-GB')+' total &nbsp;&nbsp; output tokens cost up to 5x more per token than input tokens <span class=\"ref\">7</span>';
+}
+
+function refreshOutDropdown(sid, cpx) {
+  var s=fStep(sid); if(!s) return;
+  var el=document.getElementById('out-sel-'+sid); if(!el) return;
+  el.innerHTML=buildOutOpts(cpx,s.outSz);
+  s.outSz=el.value;
+}
+
+function refreshAllAutoInputs() {
+  var el=document.getElementById('auto-input-'+steps[1].id);
+  if(el) el.innerHTML=buildAutoInput(1);
+}
+
+// ── STATE UPDATE ──────────────────────────────────────────────────────────────
+
+function upd(sid, field, val) {
+  var s=fStep(sid); if(!s) return;
+  var numFields=['aIn','aOut','oIn','oOut'];
+  var isNum=false; for(var i=0;i<numFields.length;i++) if(numFields[i]===field){isNum=true;break;}
+  s[field]=isNum?(parseFloat(val)||0):(field==='cpx'?parseInt(val):val);
+
+  if(field==='aModel'){
+    var el=document.getElementById('a-custom-'+sid);
+    if(el) el.style.display=(val==='custom_a'?'grid':'none');
+    refreshPriceDisplay(sid,'a'); refreshMismatch(sid,'a'); refreshWithinTier(sid,'a');
+  }
+  if(field==='oModel'){
+    var el=document.getElementById('o-custom-'+sid);
+    if(el) el.style.display=(val==='custom_o'?'grid':'none');
+    refreshPriceDisplay(sid,'o'); refreshMismatch(sid,'o'); refreshWithinTier(sid,'o');
+  }
+  if(field==='cpx'){ refreshOutDropdown(sid,parseInt(val)); refreshMismatch(sid,'a'); refreshMismatch(sid,'o'); }
+  if(field==='outSz'){ s.outSz=val; refreshAllAutoInputs(); refreshStepCost(steps[1].id); }
+  if(field==='inSz'){ refreshAllAutoInputs(); refreshStepCost(steps[1].id); }
+  if(field==='sys'){ refreshAllAutoInputs(); }
+  if(field==='kb'&&sid===steps[1].id){ var el=document.getElementById('auto-input-'+sid); if(el) el.innerHTML=buildAutoInput(1); }
+  if(field==='aIn'||field==='aOut') refreshPriceDisplay(sid,'a');
+  if(field==='oIn'||field==='oOut') refreshPriceDisplay(sid,'o');
+
+  refreshStepCost(sid);
+  renderResults();
+}
+
+function updDesc(sid, val) {
+  var s=fStep(sid); if(!s) return; s.desc=val;
+  var el=document.getElementById('hdesc-'+sid); if(el) el.textContent=val||'';
+}
+
+// ── BUILD PROVIDER BOX ────────────────────────────────────────────────────────
+
+function provBox(s, sidx, prov) {
+  var list=prov==='a'?ANTH:OAI;
+  var custId=prov==='a'?'custom_a':'custom_o';
+  var selM=prov==='a'?s.aModel:s.oModel;
+  var custIn=prov==='a'?s.aIn:s.oIn, custOut=prov==='a'?s.aOut:s.oOut;
+  var label=prov==='a'?'Anthropic (Claude)':'OpenAI';
+  var cls=prov==='a'?'anth':'openai';
+  var p=prices(s,prov), m=mismatch(s,prov);
+  var wtn=withinTierNote(s,prov);
+  var c=gbp(costUSD(sidx,prov));
+
+  var opts='';
+  for(var i=0;i<list.length;i++){
+    var mo=list[i];
+    var lbl=mo.inM!==null?mo.name+' - $'+mo.inM+'/$'+mo.outM+' per M tokens':mo.name;
+    opts+='<option value="'+mo.id+'"'+(mo.id===selM?' selected':'')+'>'+lbl+'</option>';
+  }
+
+  var pdText=p.inM!==null
+    ?'Input: <b>$'+p.inM.toFixed(2)+'</b> &nbsp; Output: <b>$'+p.outM.toFixed(2)+'</b> per million tokens'
+    :'Enter your prices above';
+
+  var warnCls='warn-ok', warnHTML='';
+  if(m&&m.type==='overkill'){
+    warnCls='warn-overkill';
+    warnHTML='<b>Likely overkill for this task.</b> '+m.recName+' would handle this and costs approximately '+m.save+'% less per call. Note: this assumes the cheaper model produces acceptable quality output - reliable for classification, less certain for complex drafting.';
+  } else if(m&&m.type==='weak'){
+    warnCls='warn-weak';
+    warnHTML='<b>May underperform on this task.</b> Consider a more capable model for better quality output.';
+  }
+
+  var wtnDisplay=wtn?'block':'none';
+  var wtnText=wtn||'';
+
+  return '<div class="pbox '+cls+'">'
+    +'<div class="pname '+cls+'">'+label+'</div>'
+    +'<div class="pverified">Prices verified May 2026 - verify current rates at provider before use</div>'
+    +'<div class="field"><label>Model</label>'
+    +'<select onchange="upd('+s.id+',\''+prov+'Model\',this.value)">'+opts+'</select></div>'
+    +'<div class="custom-grid" id="'+prov+'-custom-'+s.id+'" style="display:'+(selM===custId?'grid':'none')+'">'
+    +'<div class="field"><label>Input ($/M tokens)</label><input type="number" value="'+custIn+'" step="0.01" oninput="upd('+s.id+',\''+prov+'In\',this.value)"></div>'
+    +'<div class="field"><label>Output ($/M tokens)</label><input type="number" value="'+custOut+'" step="0.01" oninput="upd('+s.id+',\''+prov+'Out\',this.value)"></div>'
+    +'</div>'
+    +'<div class="price-disp" id="'+prov+'-pd-'+s.id+'">'+pdText+'</div>'
+    +'<div class="'+warnCls+'" id="'+prov+'-warn-'+s.id+'">'+warnHTML+'</div>'
+    +'<div class="within-tier-note" id="'+prov+'-tier-'+s.id+'" style="display:'+wtnDisplay+'">'+wtnText+'</div>'
+    +'</div>';
+}
+
+// ── RENDER STEPS ──────────────────────────────────────────────────────────────
+
+function renderSteps() {
+  var w=document.getElementById('steps-wrap'); if(!w) return;
+  var html='';
+
+  for(var i=0;i<steps.length;i++){
+    var s=steps[i]; var t=tokens(i); var isFirst=(i===0);
+
+    var cpxOpts='';
+    var maxCpx = isFirst ? 2 : 4;
+    for(var c=1;c<=maxCpx;c++) cpxOpts+='<option value="'+c+'"'+(s.cpx===c?' selected':'')+'>'+CPX_LABEL[c]+'</option>';
+
+    var sysOpts=buildSysOpts(s.sys);
+    var outOpts=buildOutOpts(s.cpx,s.outSz);
+
+    var kbOpts='';
+    var kbK=['none','small_faq','policy_doc','large_kb'];
+    for(var k=0;k<kbK.length;k++) kbOpts+='<option value="'+kbK[k]+'"'+(s.kb===kbK[k]?' selected':'')+'>'+KB_LABEL[kbK[k]]+'</option>';
+
+    var inputSection='';
+    if(isFirst){
+      var inOpts='';
+      var inK=['short','medium','long','very_long'];
+      for(var k=0;k<inK.length;k++) inOpts+='<option value="'+inK[k]+'"'+(s.inSz===inK[k]?' selected':'')+'>'+IN_LABEL[inK[k]]+'</option>';
+      inputSection='<div class="field"><label>How long is the original customer message?</label>'
+        +'<select onchange="upd('+s.id+',\'inSz\',this.value)">'+inOpts+'</select>'
+        +'<div class="hint assume"><span class="ref">2</span> This selection compounds through Step 2 input costs. Getting this wrong has an outsized effect on total accuracy.</div>'
+        +'</div>';
+    } else {
+      inputSection='<div class="field"><label>Input received by this step</label>'
+        +'<div id="auto-input-'+s.id+'">'+buildAutoInput(i)+'</div>'
+        +'<div class="hint" style="margin-top:6px;">The original message and Step 1 response are passed forward automatically - this is the default in Make.com and Zapier. Only the knowledge base below is a new cost at this step. <span class="ref">8</span> Your actual build may pass a structured extract only, which would reduce context size and cost.</div>'
+        +'</div>';
+    }
+
+    var kbHint=i===0
+      ?'Classification rarely needs a knowledge base - keeping this as None keeps Step 1 cheap.'
+      :'This document is injected on every single call. <span class=\"ref\">3</span> This tool uses full knowledge base injection as a deliberately conservative baseline - it will overestimate costs for well-architected builds that use RAG to retrieve only the relevant section.';
+
+    var outHint=i===0
+      ?'Options are limited to short outputs because this is a classification step - it only needs to name a category.'
+      :'Options depend on reasoning difficulty selected above. <span class=\"ref\">5</span> Output tokens cost up to 5x more per token than input tokens.';
+
+    html+='<div class="step-card">'
+      +'<div class="step-header">'
+      +'<span class="step-num">Step '+(i+1)+(i===0?' - Classify':' - Respond')+'</span>'
+      +'</div>'
+      +'<div class="step-body">'
+
+      +'<div class="g2">'
+      +'<div class="field"><label>What does this step do?</label>'
+      +'<div style="padding:7px 10px;background:#eaf4f8;border:1px solid #c8e0ea;border-radius:7px;font-size:13px;color:#1a2e44;font-weight:500;cursor:default;">'+(i===0?'Classify the incoming enquiry':'Draft a personalised reply')+'</div>'
+      +'</div>'
+      +'<div class="field"><label>Reasoning difficulty of this step</label>'
+      +'<select onchange="upd('+s.id+',\'cpx\',this.value)">'+cpxOpts+'</select>'
+      +'<div class="hint">'+(isFirst?'Classification steps are restricted to Low and Medium difficulty - if your classification feels more complex than this, it may be doing too much for a single step.':'How hard does the AI need to think for this step alone?')+' Tier recommendations are a starting point - the right model depends on your specific use case and quality requirements. A cheaper model may produce noticeably lower quality output on complex tasks. <span class="ref">6</span></div>'
+      +'</div>'
+      +'</div>'
+
+      +'<div class="g2">'
+      +'<div class="field"><label>System prompt size <span class=\"ref\">4</span></label>'
+      +'<select onchange="upd('+s.id+',\'sys\',this.value)">'+sysOpts+'</select>'
+      +'<div class="hint">These background instructions are sent to the AI on every single call. A longer system prompt adds cost on every enquiry. To verify: word count your actual system prompt and divide by 0.75, or paste it into the Anthropic or OpenAI token counting tools.</div>'
+      +'</div>'
+      +'<div class="field"><label>Knowledge base injected at this step</label>'
+      +'<select onchange="upd('+s.id+',\'kb\',this.value)">'+kbOpts+'</select>'
+      +'<div class="hint">'+kbHint+'</div>'
+      +'</div>'
+      +'</div>'
+
+      +'<div class="g2">'
+      +inputSection
+      +'<div class="field"><label>How long is the response this step produces?</label>'
+      +'<select id="out-sel-'+s.id+'" onchange="upd('+s.id+',\'outSz\',this.value)">'+outOpts+'</select>'
+      +'<div class="hint">'+outHint+'</div>'
+      +'</div>'
+      +'</div>'
+
+      +'<div class="tok-line" id="tok-'+s.id+'">'+t.inp.toLocaleString('en-GB')+' input + '+t.out+' output = '+(t.inp+t.out).toLocaleString('en-GB')+' total &nbsp;&nbsp; output tokens cost up to 5x more per token than input tokens <span class=\"ref\">7</span></div>'
+      +'<hr class="divider">'
+      +'<div class="providers-grid">'+provBox(s,i,'a')+provBox(s,i,'o')+'</div>'
+      +'</div>'
+      +'</div>';
+  }
+  w.innerHTML=html;
+  renderResults();
+}
+
+// ── RENDER RESULTS ────────────────────────────────────────────────────────────
+
+function renderResults() {
+  var w=document.getElementById('results-wrap'); if(!w) return;
+  var runs=gv('runs')||500, fx=gv('fx')||0.79;
+
+  var totA=0,totO=0;
+  for(var i=0;i<steps.length;i++){ totA+=costUSD(i,'a'); totO+=costUSD(i,'o'); }
+  var aGBP=totA*fx, oGBP=totO*fx;
+  var aMonth=aGBP*runs, oMonth=oGBP*runs;
+  var aYear=aMonth*12, oYear=oMonth*12;
+
+  var rows='';
+  for(var i=0;i<steps.length;i++){
+    var s=steps[i], t=tokens(i);
+    var aC=gbp(costUSD(i,'a')), oC=gbp(costUSD(i,'o'));
+    var mA=mismatch(s,'a'), mO=mismatch(s,'o');
+    var tagA=mA?(mA.type==='overkill'?'<span class="tag overkill">Overkill</span>':'<span class="tag weak">May underperform</span>'):'<span class="tag ok">Good fit</span>';
+    var tagO=mO?(mO.type==='overkill'?'<span class="tag overkill">Overkill</span>':'<span class="tag weak">May underperform</span>'):'<span class="tag ok">Good fit</span>';
+    var aN=s.aModel==='custom_a'?'Custom':(fModel(ANTH,s.aModel)||{name:'-'}).name;
+    var oN=s.oModel==='custom_o'?'Custom':(fModel(OAI,s.oModel)||{name:'-'}).name;
+    rows+='<tr>'
+      +'<td><b>Step '+(i+1)+'</b><br><span style="color:#8aacba;font-size:11px;">'+(s.desc||'-')+'</span></td>'
+      +'<td style="color:#b8d4de">'+t.inp.toLocaleString('en-GB')+'</td>'
+      +'<td style="color:#b8d4de">'+t.out+'</td>'
+      +'<td style="color:#b8d4de;font-weight:600">'+(t.inp+t.out).toLocaleString('en-GB')+'</td>'
+      +'<td>'+aN+' '+tagA+'<br><span style="color:#b8d4de">'+fmtP(aC)+'/enquiry</span></td>'
+      +'<td>'+oN+' '+tagO+'<br><span style="color:#b8d4de">'+fmtP(oC)+'/enquiry</span></td>'
+      +'</tr>';
+  }
+
+  var cheaper=aGBP<=oGBP?'Anthropic':'OpenAI';
+  var diffPct=Math.max(aGBP,oGBP)>0?Math.round(Math.abs(aGBP-oGBP)/Math.max(aGBP,oGBP)*100):0;
+
+  var t0=tokens(0),t1=tokens(1);
+
+  var html='<div class="results-dark">'
+    +'<h3>Step-by-step breakdown</h3>'
+    +'<div style="overflow-x:auto">'
+    +'<table class="breakdown-table"><thead><tr>'
+    +'<th>Step</th><th>Input tokens</th><th>Output tokens</th><th>Total tokens</th><th>Anthropic model</th><th>OpenAI model</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table>'
+    +'</div>'
+    +'<div class="insight amber" style="margin-top:12px"><b>Context grows from Step 1 to Step 2.</b> Step 1: '+(t0.inp+t0.out).toLocaleString('en-GB')+' tokens total. Step 2: '+(t1.inp+t1.out).toLocaleString('en-GB')+' tokens total - it carries forward the original message plus Step 1\'s response, in addition to its own system prompt and knowledge base.</div>'
+    +'<div style="height:14px"></div>'
+    +'<h3>Total cost - '+runs.toLocaleString('en-GB')+' enquiries/month <span class="ref">9</span></h3>'
+    +'<div class="rg2">'
+    +'<div class="rprov"><div class="rprov-name">Anthropic (Claude)</div>'
+    +'<div class="rrow"><span class="rl">Per enquiry (both steps)</span><span class="rv">'+fmtP(aGBP)+'</span></div>'
+    +'<div class="rrow"><span class="rl">Per month</span><span class="rv">'+fmtM(aMonth)+'</span></div>'
+    +'<div class="rrow"><span class="rl">Per year</span><span class="rv big">'+fmtK(aYear)+'</span></div>'
+    +'</div>'
+    +'<div class="rprov"><div class="rprov-name">OpenAI</div>'
+    +'<div class="rrow"><span class="rl">Per enquiry (both steps)</span><span class="rv">'+fmtP(oGBP)+'</span></div>'
+    +'<div class="rrow"><span class="rl">Per month</span><span class="rv">'+fmtM(oMonth)+'</span></div>'
+    +'<div class="rrow"><span class="rl">Per year</span><span class="rv big">'+fmtK(oYear)+'</span></div>'
+    +'</div></div>'
+    +'<div class="insight green"><b>'+cheaper+' is cheaper at your current model selections</b> - '+diffPct+'% less per enquiry.<br>'
+    +'<span style="font-size:11px;font-weight:400">This comparison reflects your current model selections only. Ensure you are comparing equivalent capability tiers for a meaningful result.</span></div>'
+    +'<div class="accuracy-box"><b>Accuracy note:</b> The token band values in this tool have been validated against real Anthropic API responses across multiple message lengths and enquiry types using direct API calls via Postman, and recalibrated where observed results differed meaningfully from theoretical estimates. Under typical conditions this tool estimates token costs within plus or minus 40% of actual costs for a straightforward two-step automation with consistent enquiry types. The largest sources of uncertainty are message length variation, system prompt size, output length variability, and the assumption that every enquiry completes both steps - if some enquiries exit after Step 1 and are handled by a human, actual costs will be lower than estimated. For a business with consistent predictable enquiry types the estimate will be more accurate. For a business with highly variable enquiry types it will be less so. Once the automation is live, verify actual costs in your provider API dashboard and adjust projections accordingly.</div>'
+    +'</div>';
+
+  w.innerHTML=html;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderSteps();
+</script>
+</body>
+</html>
