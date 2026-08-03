@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Function Health Check | CBA</title>
+<meta name="description" content="A confidential self-assessment of your finance function, benchmarked against acquisitive UK mid-market businesses.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF1F3;
+    --surface:#FFFFFF;
+    --ink:#132A3A;
+    --ink-soft:#516475;
+    --ink-faint:#8695A2;
+    --accent:#0E7C66;
+    --accent-dark:#0A5E4D;
+    --accent-soft:#DCEEE9;
+    --line:#D7DCE0;
+    --amber:#B8792E;
+    --danger:#B3432E;
+    --radius:14px;
+    --shadow: 0 1px 2px rgba(19,42,58,0.04), 0 8px 24px rgba(19,42,58,0.06);
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px);
+    background-size: 100% 32px;
+    background-attachment:local;
+    color:var(--ink);
+    font-family:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:40px 16px 80px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+  .app{
+    width:100%;
+    max-width:680px;
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:28px;
+  }
+  .brand-mark{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .brand-mark strong{color:var(--ink);}
+  .ledger{
+    display:flex;
+    gap:4px;
+    margin-bottom:32px;
+  }
+  .tick{
+    flex:1;
+    height:6px;
+    border-radius:3px;
+    background:var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .tick::after{
+    content:"";
+    position:absolute; inset:0;
+    background:var(--accent);
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform .35s ease;
+  }
+  .tick.done::after{transform:scaleX(1);}
+  .tick.current::after{transform:scaleX(1); background:var(--amber);}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:36px 32px;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--accent-dark);
+    margin:0 0 8px;
+  }
+  h1,h2{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:600;
+    margin:0 0 4px;
+    color:var(--ink);
+    letter-spacing:-0.01em;
+  }
+  h1{font-size:28px;}
+  h2{font-size:24px;}
+  .intro-copy{color:var(--ink-soft); font-size:15px; margin:14px 0 0;}
+  .section-sub{color:var(--ink-soft); font-size:14px; margin:0 0 28px;}
+
+  .question{margin-bottom:30px;}
+  .question:last-child{margin-bottom:0;}
+  .q-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-faint);
+    display:block;
+    margin-bottom:6px;
+  }
+  .q-text{
+    font-size:16px;
+    font-weight:500;
+    color:var(--ink);
+    margin:0 0 14px;
+    line-height:1.45;
+  }
+  .options{display:flex; flex-direction:column; gap:8px;}
+  .opt{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:13px 14px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    cursor:pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .opt:hover{border-color:var(--accent);}
+  .opt input{
+    margin-top:3px;
+    accent-color:var(--accent);
+    width:16px; height:16px;
+    flex-shrink:0;
+  }
+  .opt.checked{
+    border-color:var(--accent);
+    background:var(--accent-soft);
+  }
+  .opt span{font-size:14.5px; color:var(--ink); line-height:1.4;}
+  .opt.na{border-style:dashed;}
+  .opt.na span{color:var(--ink-soft); font-style:italic;}
+
+  .group-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin:16px 0 8px;
+  }
+  .group-label:first-child{margin-top:0;}
+
+  .nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:32px;
+  }
+  button{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:14.5px;
+    font-weight:600;
+    border-radius:9px;
+    padding:12px 22px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition: opacity .15s ease, transform .1s ease;
+  }
+  button:active{transform:scale(0.98);}
+  button:focus-visible{outline:3px solid var(--amber); outline-offset:2px;}
+  .btn-primary{
+    background:var(--accent);
+    color:#fff;
+    border-color:var(--accent);
+  }
+  .btn-primary:disabled{
+    background:var(--ink-faint);
+    border-color:var(--ink-faint);
+    cursor:not-allowed;
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink-soft);
+    border-color:var(--line);
+  }
+  .btn-ghost:hover{border-color:var(--ink-soft); color:var(--ink);}
+  .btn-ghost:disabled{opacity:0.35; cursor:not-allowed;}
+
+  .hint{
+    font-size:13px;
+    color:var(--ink-faint);
+    margin-top:10px;
+  }
+  .hint.warn{color:var(--amber);}
+
+  .gate-field{margin-bottom:22px;}
+  .gate-field label{
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:8px;
+    color:var(--ink);
+  }
+  .gate-field input[type=email], .gate-field input[type=text]{
+    width:100%;
+    padding:13px 14px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    font-size:15px;
+    font-family:inherit;
+    color:var(--ink);
+  }
+  .gate-field input:focus-visible{outline:3px solid var(--amber); outline-offset:1px;}
+
+  .consent{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    padding:14px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    margin-bottom:12px;
+  }
+  .consent input{margin-top:3px; accent-color:var(--accent); width:16px; height:16px; flex-shrink:0;}
+  .consent p{margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.5;}
+  .consent.required{border-color:var(--accent); background:var(--accent-soft);}
+  .consent.optional{border-style:dashed;}
+
+  .disclaimer{
+    font-size:12.5px;
+    color:var(--ink-faint);
+    border-top:1px solid var(--line);
+    margin-top:26px;
+    padding-top:16px;
+    line-height:1.6;
+  }
+
+  .state-view{text-align:center; padding:20px 0;}
+  .state-view .icon{
+    width:52px; height:52px;
+    border-radius:50%;
+    background:var(--accent-soft);
+    color:var(--accent-dark);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 18px;
+    font-family:'Fraunces', serif;
+    font-size:24px;
+  }
+  .spinner{
+    width:18px; height:18px;
+    border:2.5px solid rgba(255,255,255,0.4);
+    border-top-color:#fff;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+    display:inline-block;
+    vertical-align:middle;
+    margin-right:8px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .error-banner{
+    background:#FBEAE6;
+    border:1px solid var(--danger);
+    color:var(--danger);
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:13.5px;
+    margin-bottom:18px;
+  }
+
+  @media (max-width:600px){
+    .card{padding:26px 20px;}
+    h1{font-size:23px;}
+    h2{font-size:20px;}
+    body{padding:24px 12px 60px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brand">
+    <div class="brand-mark"><strong>CBA</strong> / Finance Function Health Check</div>
+    <div class="brand-mark" id="stepLabel"></div>
+  </div>
+  <div class="ledger" id="ledger"></div>
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+/* ===================================================================
+   CONFIG - update before going live
+   =================================================================== */
+const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/yf1ws62u69vnapnnot6q6fph4vwrhijx";
+
+/* ===================================================================
+   QUESTION DATA
+   Note: q42b ("AI champion") was added alongside q42 - it isn't in the
+   original 44-question list, but the confirmed Q42 scoring benchmark
+   ("Good = at least one Intermediate item in use, WITH a designated AI
+   champion") needs this as a separate data point to score correctly.
+   Flagging this addition; remove it if you'd rather infer it another way.
+   =================================================================== */
+const SECTIONS = [{"id": 1, "title": "Close Cycle and Reporting Speed", "questions": [{"id": "q1", "type": "mc", "text": "How many working days after month-end does your finance team typically deliver finalised management accounts to the leadership team?", "options": ["Within 5 working days", "6-10 working days", "More than 10 working days, or no fixed deadline"]}, {"id": "q2", "type": "mc", "text": "How would you describe the reliability of your month-end close - does it consistently hit the same deadline each month?", "options": ["Consistently hits the deadline; slippage is rare and exceptional", "Usually on time, but slippage of a few days happens regularly", "Frequently late, or there is no fixed deadline to begin with"]}, {"id": "q3", "type": "yn", "text": "Does your close process run to a documented timetable with named task owners assigned to each step?", "options": ["Yes", "No"]}, {"id": "q4", "type": "mc", "text": "How long after year-end are your statutory accounts typically in a state ready to go to audit or sign-off?", "options": ["Within 3 months of year-end", "3-6 months after year-end", "More than 6 months after year-end, or accounts are routinely filed late"]}]}, {"id": 2, "title": "Finance Systems and Technology", "questions": [{"id": "q5", "type": "mc", "text": "What best describes your accounting system and how well it fits your current business complexity?", "options": ["System is fit for purpose for current complexity and produces reliable, timely output", "System is workable but starting to strain - manual effort is high, or there are known gaps with no clear roadmap to address them", "System is not fit for purpose - legacy, on-premise, or unable to produce reliable output; or no formal accounting system in place"]}, {"id": "q6", "type": "mc_na", "text": "How is group consolidation handled - including intercompany eliminations across entities?", "options": ["Not applicable - we operate as a single legal entity with no intercompany transactions", "Consolidation is handled systematically - either via a dedicated tool, or via a controlled, documented Excel model that is reliable, auditable, and consistently produced on time", "Consolidation is done but the process is manual, time-consuming, or prone to error - the current approach would not scale well with additional entities", "No consistent consolidation process - group numbers are not produced, or are produced irregularly and without confidence in their accuracy"]}, {"id": "q7", "type": "mc", "text": "How well integrated are your finance systems with the rest of the business (e.g., sales, operations, HR/payroll)?", "options": ["Data flows automatically between finance and other systems; minimal manual re-keying required", "Some integration exists but key data flows still require manual steps", "Systems are largely siloed; significant manual data transfer is needed"]}, {"id": "q8", "type": "mc_na", "text": "When preparing statutory accounts - at entity level and group level - how much manual adjustment work is required to convert your management accounting data into the figures needed for statutory purposes (e.g., GAAP adjustments, acquisition accounting entries)?", "options": ["Not applicable - we are a single entity, one GAAP, with no acquisition accounting complexity", "Minimal manual adjustment - the system captures what is needed for statutory, or a small set of well-documented, repeatable adjustments are applied consistently", "Some manual adjustment work required, but it is understood, documented, and manageable within the close timetable", "Significant manual rework required - adjustments are ad hoc, undocumented, or the statutory close depends heavily on one or two individuals' knowledge"]}]}, {"id": 3, "title": "Controls and Audit Readiness", "questions": [{"id": "q9", "type": "yn", "text": "Does your business have a documented financial controls framework - including a delegated authority matrix, approval limits, and segregation of duties - that is actively followed in practice?", "options": ["Yes - documented and actively followed", "No, or it exists on paper but is not consistently followed"]}, {"id": "q10", "type": "mc", "text": "If you were asked to begin an external audit or investor due diligence process tomorrow, how long would it take to be ready?", "options": ["We could be ready to begin within 2 weeks without significant disruption to BAU", "We could be ready within 4-8 weeks with some effort and reprioritisation", "It would take more than 2 months of preparation, or we have never considered this"]}, {"id": "q11", "type": "mc", "text": "How would you describe the way financial controls are maintained and kept current in your business?", "options": ["Controls are actively maintained - there is a named owner, controls are updated when processes or risks change, and the framework is treated as a live document", "Controls exist and are broadly followed but maintenance is reactive - they tend to get reviewed only when something goes wrong or an audit flags an issue", "Controls are static or largely undocumented - the framework has not been meaningfully updated in years, or there is no clear ownership"]}, {"id": "q12", "type": "yn", "text": "Are bank reconciliations and balance sheet reconciliations completed and signed off every single month, without exception?", "options": ["Yes - every month, consistently", "No - reconciliations are missed, delayed, or not consistently signed off"]}]}, {"id": 4, "title": "Data Quality and Integrity", "questions": [{"id": "q13", "type": "mc", "text": "How confident are you in the accuracy and completeness of the data held in your accounting system?", "options": ["High confidence - data is clean, reconciled, and trusted by leadership without challenge", "Moderate confidence - some known issues exist but data is broadly reliable for decisions", "Low confidence - data has known material errors or is regularly questioned in meetings"]}, {"id": "q14", "type": "yn", "text": "Is there a single agreed source of truth for financial data across the business - e.g., no competing spreadsheets or shadow versions of the numbers that contradict the official figures (P&L, balance sheet, cash flow, leverage, stock, or otherwise)?", "options": ["Yes - one clear source of truth; shadow reporting does not exist", "No - competing data sources exist and create confusion or challenge in meetings"]}, {"id": "q15", "type": "mc", "text": "How often does management challenge or question the accuracy of finance data in business meetings or board discussions?", "options": ["Rarely - data is trusted and questioning of the numbers is exceptional", "Occasionally - specific areas are questioned but most data is accepted", "Frequently - data credibility is a recurring issue that undermines finance's influence"]}, {"id": "q16", "type": "yn", "text": "Is your chart of accounts consistent and standardised across all entities in the group?", "options": ["Yes - fully standardised across all entities", "No - entities use different account codes, cost centre structures, or naming conventions"]}]}, {"id": 5, "title": "Corporate Activity and Complexity", "questions": [{"id": "q17", "type": "mc", "text": "Are all entities in your group fully integrated into your consolidated financial reporting?", "options": ["All entities are fully integrated into consolidated reporting", "Most entities are integrated; 1-2 are reported separately or with a consistent lag", "Multiple entities are excluded from or only partially included in consolidated reporting"]}, {"id": "q18", "type": "mc", "text": "If you have completed any acquisitions or restructurings in the last 3 years, how fully have the acquired businesses been financially integrated (accounting systems, chart of accounts, management reporting)?", "options": ["Fully integrated within 6 months of acquisition, or no acquisitions in the last 3 years", "Partially integrated - some legacy processes, systems, or reporting remain in place", "Limited integration - acquired entities still run largely independently from a finance perspective"]}, {"id": "q19", "type": "mc", "text": "How clearly documented is your group's legal entity and ownership structure - the chart showing all entities, their ownership percentages, and where they sit under the holding company?", "options": ["Fully documented and up to date - could be shared in a data room at short notice", "Broadly understood internally but not formally documented or not recently reviewed", "Not clearly documented - structure is unclear, out of date, or changes have not been captured"]}, {"id": "q20", "type": "mc", "text": "Are your intercompany relationships and material trading flows documented, and are they underpinned by signed intercompany agreements?", "options": ["Intercompany relationships and trading flows are documented, current, and all material arrangements are underpinned by signed intercompany agreements", "Relationships are broadly understood but documentation is incomplete, or some intercompany agreements are unsigned or out of date", "Intercompany relationships are not formally documented, or material arrangements lack signed agreements"]}]}, {"id": 6, "title": "Cashflow Forecasting", "questions": [{"id": "q21", "type": "mc", "text": "How far ahead does your cash flow forecast typically run?", "options": ["13 weeks or more on a rolling basis", "Monthly for the next 3-6 months", "Less than 4 weeks ahead, entirely reactive, or no formal forecast exists"]}, {"id": "q22", "type": "mc", "text": "How frequently is your cash flow forecast updated?", "options": ["Weekly", "Monthly", "Quarterly or less frequently, or there is no regular update process"]}, {"id": "q23", "type": "mc_na", "text": "Is your cash flow forecast consolidated across all entities in the group - i.e., does it capture cash movements at group level, not just the main trading entity?", "options": ["Not applicable - we operate as a single legal entity", "Yes - consolidated at group level", "No - forecast covers only the main entity, or no forecast exists"]}, {"id": "q24", "type": "mc", "text": "Looking back over the last 12 months, how accurate has your cash flow forecast been against actual cash movements?", "options": ["Typically within 5-10% of actual, and movements understood well at a line item level", "Typically within 10-20% of actual, and most movements understood at a line item level", "Frequently more than 20% variance, or forecast accuracy is not tracked, or line item level variances largely not understood"]}]}, {"id": 7, "title": "P&L Budgeting and Forecasting", "questions": [{"id": "q25", "type": "mc", "text": "Does your business have a formally approved P&L budget for the current financial year, signed off by the board or ownership before the year begins?", "options": ["Yes - formally approved by the board/owners before the year starts, with entity and/or departmental-level detail", "An internal budget exists but is not formally board-approved, is high-level only, or was finalised after the year had already started", "No formal P&L budget exists"]}, {"id": "q26", "type": "mc", "text": "How frequently is your P&L budget reforecast during the year to reflect actual trading performance?", "options": ["Reforecast monthly or quarterly on a rolling basis", "Reforecast once or twice a year (e.g., a single mid-year re-budget)", "Never reforecast - the original budget stands unchanged all year, or there is no reforecast process"]}, {"id": "q27", "type": "mc_na", "text": "Is your P&L budget built and consolidated across all entities in the group, at both entity and group level?", "options": ["Not applicable - we operate as a single legal entity", "Yes - budget is built at entity level and reliably consolidated to group level", "A group-level budget exists but entity-level detail is thin, or entity budgets don't reliably roll up", "No consistent group-level budget - entities budget independently with no consolidation, or there is no group budget at all"]}, {"id": "q28", "type": "mc", "text": "Is budget-vs-actual P&L variance analysed and reported to the board or leadership team every month, with narrative explanation for material variances?", "options": ["Yes - monthly variance analysis with clear narrative explanation of material variances, presented to the board or leadership team", "Variance is reviewed internally but not consistently reported upward, or explanations are limited/inconsistent", "No regular variance analysis - actual performance is not systematically compared to budget"]}]}, {"id": 8, "title": "Board and Management Reporting Quality", "questions": [{"id": "q29", "type": "mc", "text": "Does your standard board pack include all four core financial elements - P&L, balance sheet, cash flow statement, and a key financial metrics and performance summary - delivered at every board meeting?", "options": ["Yes - all four elements are included consistently at every board meeting", "Yes - but one or more elements is regularly incomplete, missing, or delivered late", "No - board financial reporting is partial, ad hoc, or not consistently produced"]}, {"id": "q30", "type": "mc", "text": "How would you describe the narrative and analysis quality in your management accounts - do they explain what happened and why, or mainly present numbers without context?", "options": ["Clear written narrative explaining key variances, performance drivers, and forward-looking commentary", "Some commentary included, but reports are mainly numbers-focused with limited analysis", "Numbers only - no narrative, no variance explanation, no forward context"]}, {"id": "q31", "type": "yn", "text": "Are your board and management reports produced on a fixed, known schedule that board members and executives can rely on in advance?", "options": ["Yes - consistent, reliable, and known in advance", "No - timing varies month to month or reports are frequently late"]}, {"id": "q32", "type": "mc", "text": "Do your management reports include non-financial KPIs alongside financial metrics - for example, operational, commercial, or people metrics that provide context for the financial results?", "options": ["Yes - non-financial KPIs are tracked, included, and explicitly linked to financial performance", "Some non-financial metrics appear but not consistently or comprehensively", "No - reports are purely financial with no operational or non-financial context"]}]}, {"id": 9, "title": "Finance Function Structure", "questions": [{"id": "q33", "type": "mc", "text": "Which of the following functions sit within, or are directly managed by, your finance function with clear named ownership? (Tax, Payroll, Statutory reporting, Forecasting / FP&A, Treasury / cash management)", "options": ["4 or 5 of these functions sit within finance with clear, named ownership", "2-3 functions have clear ownership; others are managed informally or sit outside finance", "Fewer than 2 of these are formally owned by finance, or ownership is unclear across the board"]}, {"id": "q34", "type": "mc", "text": "Does your finance function have a clear operating model with appropriate segregation of duties - i.e., distinct roles for transactional, management accounting, and strategic finance, where the person initiating or posting is not the same person approving or independently reviewing?", "options": ["Clear operating model with segregation of duties in place - initiation, approval, and independent review sit with different people", "Roles broadly exist but segregation is inconsistent - the same individuals sometimes initiate and approve, particularly under time pressure", "No clear operating model and no meaningful segregation - finance is reactive and the same people perform, approve, and review their own work"]}, {"id": "q35", "type": "yn", "text": "Does your organisation have a professionally qualified finance lead (ACA, ACCA, CIMA or international equivalent) at Director or CFO level?", "options": ["Yes", "No"]}]}, {"id": 10, "title": "Headcount and Capacity", "questions": [{"id": "q36", "type": "mc", "text": "How would you honestly describe your current finance team's capacity relative to the demands placed on it by the business?", "options": ["Sufficient capacity to meet current demands comfortably and absorb moderate growth without breaking", "Stretched but managing - additional headcount or process improvement would clearly help", "Significantly under-resourced - critical work is regularly delayed, deprioritised, or not done"]}, {"id": "q37", "type": "mc", "text": "If a major transaction - acquisition, fundraise, or sale process - arose in the next 12 months, could your finance team support it without dropping critical BAU work?", "options": ["Yes - team has sufficient capacity or access to interim resource to handle a transaction alongside BAU", "Possibly - but it would require bringing in additional resource or some BAU tasks would slip materially", "No - a major transaction would overwhelm current finance capacity"]}, {"id": "q38", "type": "yn", "text": "Is there documented cover for key finance roles in the event of an extended absence - for example, illness, parental leave, or resignation?", "options": ["Yes - cover arrangements are documented and have been tested or used", "No - the business relies entirely on individuals being available; there is no formal cover plan"]}]}, {"id": 11, "title": "Finance Team Capability and Resilience", "questions": [{"id": "q39", "type": "mc", "text": "What proportion of your finance team hold a professional accounting qualification (ACA, ACCA, CIMA or equivalent), or are actively studying towards one?", "options": ["More than 50% of the finance team are qualified or actively studying", "25-50% are qualified or studying", "Less than 25% are qualified, and no qualification pathway or study support is in place"]}, {"id": "q40", "type": "mc", "text": "How would you describe staff turnover within the finance team over the last 2 years?", "options": ["Low - team is stable; departures have been planned and managed with handovers", "Moderate - some unplanned turnover but institutional knowledge has largely been retained", "High - significant or repeated unplanned departures have created knowledge gaps or process risks"]}, {"id": "q41", "type": "yn", "text": "Does the finance team have access to established external support - for example, outsourced specialists, technical accounting advisers, or interim resource - that can be called on when capability gaps arise?", "options": ["Yes - established relationships exist and have been used when needed", "No - the team relies entirely on internal resource regardless of the challenge or complexity"]}]}, {"id": 12, "title": "AI and Automation Maturity", "questions": [{"id": "q42", "type": "multi", "text": "Which of the following types of automation or AI does your finance team currently use as part of their regular work? Select all that apply.", "groups": [{"label": "Foundation", "options": ["Automated bank feeds and transaction reconciliation (e.g., Xero bank feeds, Dext, AutoEntry, Hubdoc, Yokoy)", "Vendor-installed AI features within existing software (e.g., suggested transaction categorisation, automated alerts built into your accounting system)", "Standalone AI assistant or large language model tools used for drafting, summarising, or analysing data (e.g., Microsoft Copilot, ChatGPT, Claude, Gemini)"]}, {"label": "Intermediate", "options": ["AI embedded within existing tools to assist with building financial models or outputs directly in your working environment (e.g., Copilot within Excel, Claude within document or spreadsheet tools)", "Data automation and self-serve reporting tools (e.g., Power Query, Power BI, Tableau, Looker, Alteryx, Metabase)", "Scripted or rules-based process automation (e.g., Power Automate, Zapier, Make.com, UiPath, Python scripts)"]}, {"label": "Advanced", "options": ["AI-assisted forecasting or anomaly detection (e.g., Anaplan, Pigment, Adaptive Planning, DataRails)", "AI-driven workflows that execute multi-step finance tasks autonomously (e.g., automated invoice processing end-to-end, self-executing reconciliation workflows, no-code or code-built agentic finance tools)"]}]}, {"id": "q42b", "type": "yn", "text": "Does your finance team have a designated 'AI champion' - a named individual responsible for evaluating and overseeing AI and automation tools?", "options": ["Yes", "No"]}, {"id": "q43", "type": "mc", "text": "Does the finance team have a documented and agreed approach for reviewing and validating outputs produced by AI or automation tools before those outputs are included in reports or submitted to management?", "options": ["Yes - a documented approach exists that is signed off by the finance lead, clearly designates which tasks AI handles and which require human judgement, and distinguishes between rule-based outputs that can be relied upon directly and AI-generated outputs that require scrutiny before use", "Some informal guidelines exist but the approach is not fully documented, agreed, or signed off - review happens inconsistently or only for some AI outputs", "No documented approach - AI outputs are used without a consistent review framework or any consideration of how the output was generated"]}, {"id": "q44", "type": "mc", "text": "How would you describe the finance team's general attitude towards adopting new technology and automation?", "options": ["Proactive - finance actively seeks, evaluates, and adopts new tools with appropriate governance and review discipline", "Willing but reactive - team adopts tools when directed or when others introduce them, but does not drive it", "Resistant - there is significant pushback against new tools, or technology change is avoided"]}]}]
+;
+
+/* ===================================================================
+   STATE
+   =================================================================== */
+let step = 0; // 0..SECTIONS.length-1 = question sections, then +1 = email gate, then +1 = success
+const TOTAL_STEPS = SECTIONS.length + 1; // + email gate step
+const answers = {}; // { q1: "text value", ... , q42: ["text1","text2"], q42b: "Yes" }
+
+/* ===================================================================
+   RENDER: LEDGER PROGRESS
+   =================================================================== */
+function renderLedger(){
+  const ledger = document.getElementById('ledger');
+  ledger.innerHTML = '';
+  for(let i=0;i<TOTAL_STEPS;i++){
+    const t = document.createElement('div');
+    t.className = 'tick' + (i < step ? ' done' : (i === step ? ' current' : ''));
+    ledger.appendChild(t);
+  }
+  const label = document.getElementById('stepLabel');
+  if(step < SECTIONS.length){
+    label.textContent = `Section ${step+1} of ${SECTIONS.length}`;
+  } else if(step === SECTIONS.length){
+    label.textContent = `Almost done`;
+  } else {
+    label.textContent = '';
+  }
+}
+
+/* ===================================================================
+   RENDER: A SECTION OF QUESTIONS
+   =================================================================== */
+function optionRow(q, optText, inputType, groupName, checked){
+  const isNA = optText.startsWith('Not applicable');
+  const wrap = document.createElement('label');
+  wrap.className = 'opt' + (isNA ? ' na' : '') + (checked ? ' checked' : '');
+  const input = document.createElement('input');
+  input.type = inputType;
+  input.name = groupName;
+  input.value = optText;
+  if(checked) input.checked = true;
+  input.addEventListener('change', () => onAnswerChange(q, optText, inputType));
+  const span = document.createElement('span');
+  span.textContent = optText;
+  wrap.appendChild(input);
+  wrap.appendChild(span);
+  return wrap;
+}
+
+function onAnswerChange(q, optText, inputType){
+  if(inputType === 'checkbox'){
+    if(!Array.isArray(answers[q.id])) answers[q.id] = [];
+    const idx = answers[q.id].indexOf(optText);
+    const input = event.target;
+    if(input.checked && idx === -1) answers[q.id].push(optText);
+    if(!input.checked && idx !== -1) answers[q.id].splice(idx,1);
+  } else {
+    answers[q.id] = optText;
+  }
+  renderSection(step); // re-render to refresh "checked" styling + nav enabled state
+}
+
+function renderQuestionBlock(q, index){
+  const block = document.createElement('div');
+  block.className = 'question';
+
+  const num = document.createElement('span');
+  num.className = 'q-num';
+  num.textContent = `Q${index}`;
+  block.appendChild(num);
+
+  const text = document.createElement('p');
+  text.className = 'q-text';
+  text.textContent = q.text;
+  block.appendChild(text);
+
+  if(q.type === 'multi'){
+    q.groups.forEach(group => {
+      const gl = document.createElement('div');
+      gl.className = 'group-label';
+      gl.textContent = group.label;
+      block.appendChild(gl);
+      const optsWrap = document.createElement('div');
+      optsWrap.className = 'options';
+      group.options.forEach(optText => {
+        const checked = Array.isArray(answers[q.id]) && answers[q.id].includes(optText);
+        optsWrap.appendChild(optionRow(q, optText, 'checkbox', q.id, checked));
+      });
+      block.appendChild(optsWrap);
+    });
+    const hint = document.createElement('div');
+    hint.className = 'hint';
+    hint.textContent = 'Select all that apply. It is fine to select none.';
+    block.appendChild(hint);
+  } else {
+    const optsWrap = document.createElement('div');
+    optsWrap.className = 'options';
+    q.options.forEach(optText => {
+      const checked = answers[q.id] === optText;
+      optsWrap.appendChild(optionRow(q, optText, 'radio', q.id, checked));
+    });
+    block.appendChild(optsWrap);
+  }
+
+  return block;
+}
+
+function sectionIsComplete(section){
+  return section.questions.every(q => {
+    if(q.type === 'multi') return true; // optional, zero selections is valid
+    return answers[q.id] !== undefined && answers[q.id] !== '';
+  });
+}
+
+function renderSection(i){
+  const section = SECTIONS[i];
+  const card = document.getElementById('card');
+  card.innerHTML = '';
+
+  const eyebrow = document.createElement('p');
+  eyebrow.className = 'eyebrow';
+  eyebrow.textContent = `Section ${section.id} / ${SECTIONS.length}`;
+  card.appendChild(eyebrow);
+
+  const h = document.createElement('h2');
+  h.textContent = section.title;
+  card.appendChild(h);
+
+  const sub = document.createElement('p');
+  sub.className = 'section-sub';
+  sub.textContent = i === 0
+    ? 'Answer honestly, based on how things actually work today - not how you would like them to work.'
+    : '';
+  card.appendChild(sub);
+
+  let qNum = 1;
+  for(let s=0; s<i; s++) qNum += SECTIONS[s].questions.length;
+
+  section.questions.forEach(q => {
+    card.appendChild(renderQuestionBlock(q, qNum));
+    qNum++;
+  });
+
+  const nav = document.createElement('div');
+  nav.className = 'nav';
+
+  const back = document.createElement('button');
+  back.className = 'btn-ghost';
+  back.textContent = 'Back';
+  back.disabled = (i === 0);
+  back.addEventListener('click', () => { step = Math.max(0, step-1); renderStep(); });
+
+  const next = document.createElement('button');
+  next.className = 'btn-primary';
+  next.textContent = (i === SECTIONS.length - 1) ? 'Continue to get my results' : 'Next section';
+  next.disabled = !sectionIsComplete(section);
+  next.addEventListener('click', () => { step = step+1; renderStep(); window.scrollTo({top:0, behavior:'smooth'}); });
+
+  nav.appendChild(back);
+  nav.appendChild(next);
+  card.appendChild(nav);
+
+  if(!sectionIsComplete(section)){
+    const hint = document.createElement('p');
+    hint.className = 'hint';
+    hint.textContent = 'Answer every question in this section to continue.';
+    card.appendChild(hint);
+  }
+}
+
+
+/* ===================================================================
+   RENDER: EMAIL GATE (only reachable once every question is answered)
+   =================================================================== */
+function renderGate(){
+  const card = document.getElementById('card');
+  card.innerHTML = '';
+
+  const eyebrow = document.createElement('p');
+  eyebrow.className = 'eyebrow';
+  eyebrow.textContent = 'Last step';
+  card.appendChild(eyebrow);
+
+  const h = document.createElement('h2');
+  h.textContent = 'Where should we send your results?';
+  card.appendChild(h);
+
+  const sub = document.createElement('p');
+  sub.className = 'section-sub';
+  sub.textContent = "You've completed all 44 questions. Enter your details below and we'll email your personalised Finance Function Health Check report.";
+  card.appendChild(sub);
+
+  const nameField = document.createElement('div');
+  nameField.className = 'gate-field';
+  nameField.innerHTML = `<label for="fdName">Your name</label>
+    <input type="text" id="fdName" autocomplete="name" placeholder="Jane Smith">`;
+  card.appendChild(nameField);
+
+  const companyField = document.createElement('div');
+  companyField.className = 'gate-field';
+  companyField.innerHTML = `<label for="fdCompany">Company name</label>
+    <input type="text" id="fdCompany" autocomplete="organization" placeholder="Acme Holdings Ltd">`;
+  card.appendChild(companyField);
+
+  const emailField = document.createElement('div');
+  emailField.className = 'gate-field';
+  emailField.innerHTML = `<label for="fdEmail">Work email</label>
+    <input type="email" id="fdEmail" autocomplete="email" placeholder="jane@acme.co.uk">`;
+  card.appendChild(emailField);
+
+  // Required consent - results delivery (not marketing)
+  const resultsConsent = document.createElement('label');
+  resultsConsent.className = 'consent required';
+  resultsConsent.innerHTML = `
+    <input type="checkbox" id="fdResultsConsent">
+    <p><strong>Send me my results.</strong> I understand this report is a self-assessment starting point for
+    conversation, not a definitive judgement, and should be reviewed with a qualified adviser before acting on any
+    recommendations.</p>`;
+  card.appendChild(resultsConsent);
+
+  // Optional, unbundled, unticked marketing opt-in
+  const marketingConsent = document.createElement('label');
+  marketingConsent.className = 'consent optional';
+  marketingConsent.innerHTML = `
+    <input type="checkbox" id="fdMarketingOptIn">
+    <p>I'd also like to receive occasional insights and updates from CBA. This is optional and separate from
+    receiving my results above.</p>`;
+  card.appendChild(marketingConsent);
+
+  const errorBanner = document.createElement('div');
+  errorBanner.className = 'error-banner';
+  errorBanner.style.display = 'none';
+  errorBanner.id = 'errorBanner';
+  card.insertBefore(errorBanner, resultsConsent);
+
+  const nav = document.createElement('div');
+  nav.className = 'nav';
+
+  const back = document.createElement('button');
+  back.className = 'btn-ghost';
+  back.textContent = 'Back';
+  back.addEventListener('click', () => { step = SECTIONS.length - 1; renderStep(); });
+
+  const submit = document.createElement('button');
+  submit.className = 'btn-primary';
+  submit.textContent = 'Get my results';
+  submit.addEventListener('click', handleSubmit);
+
+  nav.appendChild(back);
+  nav.appendChild(submit);
+  card.appendChild(nav);
+
+  const disclaimer = document.createElement('p');
+  disclaimer.className = 'disclaimer';
+  disclaimer.textContent = 'Your answers and results are logged for our internal review ahead of any follow-up conversation you request. We will not share your individual responses outside CBA. See our privacy policy for full details.';
+  card.appendChild(disclaimer);
+}
+
+function isValidEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function handleSubmit(){
+  const name = document.getElementById('fdName').value.trim();
+  const company = document.getElementById('fdCompany').value.trim();
+  const email = document.getElementById('fdEmail').value.trim();
+  const resultsConsent = document.getElementById('fdResultsConsent').checked;
+  const marketingOptIn = document.getElementById('fdMarketingOptIn').checked;
+  const errorBanner = document.getElementById('errorBanner');
+
+  const missing = [];
+  if(!name) missing.push('your name');
+  if(!company) missing.push('company name');
+  if(!isValidEmail(email)) missing.push('a valid work email');
+  if(!resultsConsent) missing.push('confirmation you understand the results disclaimer');
+
+  if(missing.length){
+    errorBanner.style.display = 'block';
+    errorBanner.textContent = `Before we can send your results, please provide: ${missing.join(', ')}.`;
+    return;
+  }
+  errorBanner.style.display = 'none';
+
+  renderSubmitting();
+
+  const payload = {
+    respondent: { name, company, email, marketingOptIn },
+    answers: answers,
+    submittedAt: new Date().toISOString()
+  };
+
+  try{
+    const res = await fetch(MAKE_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok) throw new Error('Webhook responded with status ' + res.status);
+    renderSuccess(email);
+  } catch(err){
+    renderSubmitError();
+  }
+}
+
+/* ===================================================================
+   RENDER: SUBMIT / SUCCESS / ERROR STATES
+   =================================================================== */
+function renderSubmitting(){
+  const card = document.getElementById('card');
+  card.innerHTML = `
+    <div class="state-view">
+      <div class="icon"><span class="spinner" style="border-top-color:var(--accent-dark); border-color:rgba(14,124,102,0.25);"></span></div>
+      <h2>Scoring your results...</h2>
+      <p class="section-sub">This takes a few moments. Please don't close this window.</p>
+    </div>`;
+  document.getElementById('stepLabel').textContent = '';
+}
+
+function renderSuccess(email){
+  const card = document.getElementById('card');
+  card.innerHTML = `
+    <div class="state-view">
+      <div class="icon">&#10003;</div>
+      <h2>Your results are on the way</h2>
+      <p class="section-sub">We're sending your Finance Function Health Check report to <strong>${email}</strong>.
+      It should land within a few minutes - do check your spam folder if it doesn't appear.</p>
+    </div>`;
+  document.getElementById('ledger').innerHTML = '';
+  document.getElementById('stepLabel').textContent = 'Complete';
+}
+
+function renderSubmitError(){
+  const card = document.getElementById('card');
+  card.innerHTML = `
+    <div class="state-view">
+      <div class="icon" style="background:#FBEAE6; color:var(--danger);">!</div>
+      <h2>Something went wrong</h2>
+      <p class="section-sub">We couldn't submit your results just now. Please try again, or contact us directly if this keeps happening.</p>
+      <div class="nav" style="justify-content:center;">
+        <button class="btn-primary" onclick="renderGate()">Try again</button>
+      </div>
+    </div>`;
+}
+
+/* ===================================================================
+   ROUTER
+   =================================================================== */
+function renderStep(){
+  renderLedger();
+  if(step < SECTIONS.length){
+    renderSection(step);
+  } else if(step === SECTIONS.length){
+    renderGate();
+  }
+}
+
+renderStep();
+
+/* ===================================================================
+   DEBUG HELPER - only active with ?debug=1 in the URL.
+   Auto-fills all 44 questions with a plausible answer and jumps to the
+   email gate, so you can test the webhook connection without manually
+   clicking through the whole form each time. Not visible to real
+   respondents. Safe to delete this whole block before final launch if
+   you'd rather it never ships at all.
+   =================================================================== */
+if (new URLSearchParams(window.location.search).get('debug') === '1') {
+  const btn = document.createElement('button');
+  btn.textContent = 'Fill random test answers & skip to results';
+  btn.style.cssText = 'position:fixed; bottom:16px; right:16px; z-index:999; background:#B8792E; color:#fff; border:none; padding:10px 16px; border-radius:8px; font-family:sans-serif; font-size:13px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+  btn.addEventListener('click', () => {
+    SECTIONS.forEach(section => {
+      section.questions.forEach(q => {
+        if (q.type === 'multi') {
+          // randomly select a plausible subset (0 to all) across all groups
+          const allOpts = q.groups.flatMap(g => g.options);
+          const picked = allOpts.filter(() => Math.random() < 0.4);
+          answers[q.id] = picked;
+        } else {
+          const randIndex = Math.floor(Math.random() * q.options.length);
+          answers[q.id] = q.options[randIndex];
+        }
+      });
+    });
+    step = SECTIONS.length;
+    renderStep();
+  });
+  document.body.appendChild(btn);
+}
+</script>
+</body>
+</html>
